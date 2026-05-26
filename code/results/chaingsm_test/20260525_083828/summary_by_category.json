@@ -1,0 +1,602 @@
+[
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "direct",
+    "category": "attribute_mismatch",
+    "correct": 38,
+    "total": 167,
+    "accuracy": 0.2275449101796407
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "direct",
+    "category": "independent_decoy",
+    "correct": 26,
+    "total": 182,
+    "accuracy": 0.14285714285714285
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "direct",
+    "category": "original",
+    "correct": 86,
+    "total": 200,
+    "accuracy": 0.43
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "direct",
+    "category": "path_competition",
+    "correct": 39,
+    "total": 159,
+    "accuracy": 0.24528301886792453
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "direct",
+    "category": "target_scope_misalignment",
+    "correct": 28,
+    "total": 171,
+    "accuracy": 0.16374269005847952
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 14,
+    "total": 167,
+    "accuracy": 0.08383233532934131
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "independent_decoy",
+    "correct": 9,
+    "total": 182,
+    "accuracy": 0.04945054945054945
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "original",
+    "correct": 19,
+    "total": 200,
+    "accuracy": 0.095
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "path_competition",
+    "correct": 13,
+    "total": 159,
+    "accuracy": 0.08176100628930817
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 11,
+    "total": 171,
+    "accuracy": 0.06432748538011696
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 48,
+    "total": 167,
+    "accuracy": 0.2874251497005988
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "independent_decoy",
+    "correct": 29,
+    "total": 182,
+    "accuracy": 0.15934065934065933
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "original",
+    "correct": 79,
+    "total": 200,
+    "accuracy": 0.395
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "path_competition",
+    "correct": 34,
+    "total": 159,
+    "accuracy": 0.2138364779874214
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 32,
+    "total": 171,
+    "accuracy": 0.1871345029239766
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "attribute_mismatch",
+    "correct": 35,
+    "total": 167,
+    "accuracy": 0.20958083832335328
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "independent_decoy",
+    "correct": 19,
+    "total": 182,
+    "accuracy": 0.1043956043956044
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "original",
+    "correct": 78,
+    "total": 200,
+    "accuracy": 0.39
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "path_competition",
+    "correct": 33,
+    "total": 159,
+    "accuracy": 0.20754716981132076
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "target_scope_misalignment",
+    "correct": 24,
+    "total": 171,
+    "accuracy": 0.14035087719298245
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 55,
+    "total": 167,
+    "accuracy": 0.32934131736526945
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "independent_decoy",
+    "correct": 23,
+    "total": 182,
+    "accuracy": 0.12637362637362637
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "original",
+    "correct": 109,
+    "total": 200,
+    "accuracy": 0.545
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "path_competition",
+    "correct": 51,
+    "total": 159,
+    "accuracy": 0.32075471698113206
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 36,
+    "total": 171,
+    "accuracy": 0.21052631578947367
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 29,
+    "total": 167,
+    "accuracy": 0.17365269461077845
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "independent_decoy",
+    "correct": 20,
+    "total": 182,
+    "accuracy": 0.10989010989010989
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "original",
+    "correct": 93,
+    "total": 200,
+    "accuracy": 0.465
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "path_competition",
+    "correct": 40,
+    "total": 159,
+    "accuracy": 0.25157232704402516
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 32,
+    "total": 171,
+    "accuracy": 0.1871345029239766
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "direct",
+    "category": "attribute_mismatch",
+    "correct": 77,
+    "total": 167,
+    "accuracy": 0.46107784431137727
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "direct",
+    "category": "independent_decoy",
+    "correct": 63,
+    "total": 182,
+    "accuracy": 0.34615384615384615
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "direct",
+    "category": "original",
+    "correct": 157,
+    "total": 200,
+    "accuracy": 0.785
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "direct",
+    "category": "path_competition",
+    "correct": 71,
+    "total": 159,
+    "accuracy": 0.44654088050314467
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "direct",
+    "category": "target_scope_misalignment",
+    "correct": 57,
+    "total": 171,
+    "accuracy": 0.3333333333333333
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 67,
+    "total": 167,
+    "accuracy": 0.40119760479041916
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "independent_decoy",
+    "correct": 60,
+    "total": 182,
+    "accuracy": 0.32967032967032966
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "original",
+    "correct": 161,
+    "total": 200,
+    "accuracy": 0.805
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "path_competition",
+    "correct": 82,
+    "total": 159,
+    "accuracy": 0.5157232704402516
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 58,
+    "total": 171,
+    "accuracy": 0.3391812865497076
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 73,
+    "total": 167,
+    "accuracy": 0.437125748502994
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "independent_decoy",
+    "correct": 65,
+    "total": 182,
+    "accuracy": 0.35714285714285715
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "original",
+    "correct": 154,
+    "total": 200,
+    "accuracy": 0.77
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "path_competition",
+    "correct": 79,
+    "total": 159,
+    "accuracy": 0.4968553459119497
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 53,
+    "total": 171,
+    "accuracy": 0.30994152046783624
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "direct",
+    "category": "attribute_mismatch",
+    "correct": 113,
+    "total": 167,
+    "accuracy": 0.6766467065868264
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "direct",
+    "category": "independent_decoy",
+    "correct": 114,
+    "total": 182,
+    "accuracy": 0.6263736263736264
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "direct",
+    "category": "original",
+    "correct": 172,
+    "total": 200,
+    "accuracy": 0.86
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "direct",
+    "category": "path_competition",
+    "correct": 110,
+    "total": 159,
+    "accuracy": 0.6918238993710691
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "direct",
+    "category": "target_scope_misalignment",
+    "correct": 90,
+    "total": 171,
+    "accuracy": 0.5263157894736842
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 104,
+    "total": 167,
+    "accuracy": 0.6227544910179641
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "independent_decoy",
+    "correct": 85,
+    "total": 182,
+    "accuracy": 0.46703296703296704
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "original",
+    "correct": 179,
+    "total": 200,
+    "accuracy": 0.895
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "path_competition",
+    "correct": 112,
+    "total": 159,
+    "accuracy": 0.7044025157232704
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 82,
+    "total": 171,
+    "accuracy": 0.47953216374269003
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 105,
+    "total": 167,
+    "accuracy": 0.6287425149700598
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "independent_decoy",
+    "correct": 90,
+    "total": 182,
+    "accuracy": 0.4945054945054945
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "original",
+    "correct": 180,
+    "total": 200,
+    "accuracy": 0.9
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "path_competition",
+    "correct": 105,
+    "total": 159,
+    "accuracy": 0.660377358490566
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 87,
+    "total": 171,
+    "accuracy": 0.5087719298245614
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "direct",
+    "category": "attribute_mismatch",
+    "correct": 122,
+    "total": 167,
+    "accuracy": 0.7305389221556886
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "direct",
+    "category": "independent_decoy",
+    "correct": 119,
+    "total": 182,
+    "accuracy": 0.6538461538461539
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "direct",
+    "category": "original",
+    "correct": 187,
+    "total": 200,
+    "accuracy": 0.935
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "direct",
+    "category": "path_competition",
+    "correct": 130,
+    "total": 159,
+    "accuracy": 0.8176100628930818
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "direct",
+    "category": "target_scope_misalignment",
+    "correct": 99,
+    "total": 171,
+    "accuracy": 0.5789473684210527
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 22,
+    "total": 167,
+    "accuracy": 0.1317365269461078
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "independent_decoy",
+    "correct": 11,
+    "total": 182,
+    "accuracy": 0.06043956043956044
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "original",
+    "correct": 42,
+    "total": 200,
+    "accuracy": 0.21
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "path_competition",
+    "correct": 24,
+    "total": 159,
+    "accuracy": 0.1509433962264151
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 21,
+    "total": 171,
+    "accuracy": 0.12280701754385964
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "attribute_mismatch",
+    "correct": 127,
+    "total": 167,
+    "accuracy": 0.7604790419161677
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "independent_decoy",
+    "correct": 118,
+    "total": 182,
+    "accuracy": 0.6483516483516484
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "original",
+    "correct": 188,
+    "total": 200,
+    "accuracy": 0.94
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "path_competition",
+    "correct": 128,
+    "total": 159,
+    "accuracy": 0.8050314465408805
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "category": "target_scope_misalignment",
+    "correct": 103,
+    "total": 171,
+    "accuracy": 0.6023391812865497
+  }
+]

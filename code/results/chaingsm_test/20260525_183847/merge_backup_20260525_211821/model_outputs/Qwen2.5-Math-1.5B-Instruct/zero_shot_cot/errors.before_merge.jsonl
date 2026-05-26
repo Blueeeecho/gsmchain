@@ -1,0 +1,1 @@
+{"stage": "generate", "model_name": "Qwen2.5-Math-1.5B-Instruct", "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct", "method": "zero_shot_cot", "error": "OverflowError('integer division result too large for a float')", "timestamp": "2026-05-25T19:52:11"}

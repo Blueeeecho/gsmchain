@@ -1,0 +1,23 @@
+{
+  "expected_original_count": 1319,
+  "actual_original_count": 1319,
+  "expected_variant_count": 5276,
+  "actual_variant_count": 2186,
+  "total_records": 3505,
+  "failed_count": 3090,
+  "category_counts": {
+    "original": 1319,
+    "path_competition": 504,
+    "independent_decoy": 591,
+    "attribute_mismatch": 533,
+    "target_scope_misalignment": 558
+  },
+  "output_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/gsm8k_test_full/gsm8k_test_full_6595.jsonl",
+  "sorted_output_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/gsm8k_test_full/gsm8k_test_full_6595.sorted.jsonl",
+  "selected_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/raw/selected_gsm8k_test_full_all.jsonl",
+  "input_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/raw/test-00000-of-00001.jsonl",
+  "run_name": "gsm8k_test_full",
+  "seed": 42,
+  "max_workers": 16,
+  "generator_model": "deepseek-v4-flash"
+}

@@ -1,0 +1,107 @@
+[
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "direct",
+    "correct": 2,
+    "total": 10,
+    "accuracy": 0.2
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "eight_shot_cot",
+    "correct": 1,
+    "total": 10,
+    "accuracy": 0.1
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "method": "zero_shot_cot",
+    "correct": 3,
+    "total": 10,
+    "accuracy": 0.3
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "correct": 2,
+    "total": 10,
+    "accuracy": 0.2
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "eight_shot_cot",
+    "correct": 3,
+    "total": 10,
+    "accuracy": 0.3
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "zero_shot_cot",
+    "correct": 4,
+    "total": 10,
+    "accuracy": 0.4
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "direct",
+    "correct": 5,
+    "total": 10,
+    "accuracy": 0.5
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "correct": 6,
+    "total": 10,
+    "accuracy": 0.6
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "correct": 2,
+    "total": 10,
+    "accuracy": 0.2
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "direct",
+    "correct": 5,
+    "total": 10,
+    "accuracy": 0.5
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "eight_shot_cot",
+    "correct": 5,
+    "total": 10,
+    "accuracy": 0.5
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "method": "zero_shot_cot",
+    "correct": 4,
+    "total": 10,
+    "accuracy": 0.4
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "direct",
+    "correct": 7,
+    "total": 10,
+    "accuracy": 0.7
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "eight_shot_cot",
+    "correct": 0,
+    "total": 10,
+    "accuracy": 0.0
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "correct": 6,
+    "total": 10,
+    "accuracy": 0.6
+  }
+]

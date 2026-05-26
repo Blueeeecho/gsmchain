@@ -1,0 +1,6 @@
+model_name,method,category,correct,total,accuracy
+Qwen2.5-0.5B-Instruct,direct,attribute_mismatch,185,1316,0.1405775075987842
+Qwen2.5-0.5B-Instruct,direct,independent_decoy,143,1314,0.10882800608828005
+Qwen2.5-0.5B-Instruct,direct,original,451,1319,0.3419257012888552
+Qwen2.5-0.5B-Instruct,direct,path_competition,189,1312,0.14405487804878048
+Qwen2.5-0.5B-Instruct,direct,target_scope_misalignment,161,1314,0.12252663622526636

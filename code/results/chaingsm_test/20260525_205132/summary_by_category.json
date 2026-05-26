@@ -1,0 +1,42 @@
+[
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "attribute_mismatch",
+    "correct": 185,
+    "total": 1316,
+    "accuracy": 0.1405775075987842
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "independent_decoy",
+    "correct": 143,
+    "total": 1314,
+    "accuracy": 0.10882800608828005
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "original",
+    "correct": 451,
+    "total": 1319,
+    "accuracy": 0.3419257012888552
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "path_competition",
+    "correct": 189,
+    "total": 1312,
+    "accuracy": 0.14405487804878048
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "method": "direct",
+    "category": "target_scope_misalignment",
+    "correct": 161,
+    "total": 1314,
+    "accuracy": 0.12252663622526636
+  }
+]

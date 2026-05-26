@@ -1,0 +1,140 @@
+{
+  "timestamp": "2026-05-25T21:18:22",
+  "target": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_183847",
+  "backup_dir": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_183847/merge_backup_20260525_211821",
+  "expected_per_model_method": 6575,
+  "actions": [
+    {
+      "model_name": "Qwen2.5-0.5B-Instruct",
+      "method": "direct",
+      "source": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_205132/model_outputs/Qwen2.5-0.5B-Instruct/direct/predictions.jsonl",
+      "target": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_183847/model_outputs/Qwen2.5-0.5B-Instruct/direct/predictions.jsonl",
+      "old_count": 683,
+      "new_count": 6575
+    },
+    {
+      "model_name": "Qwen2.5-Math-1.5B-Instruct",
+      "method": "direct",
+      "source": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_205852/model_outputs/Qwen2.5-Math-1.5B-Instruct/direct/predictions.jsonl",
+      "target": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_183847/model_outputs/Qwen2.5-Math-1.5B-Instruct/direct/predictions.jsonl",
+      "old_count": 786,
+      "new_count": 6575
+    },
+    {
+      "model_name": "Qwen2.5-Math-1.5B-Instruct",
+      "method": "zero_shot_cot",
+      "source": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_205852/model_outputs/Qwen2.5-Math-1.5B-Instruct/zero_shot_cot/predictions.jsonl",
+      "target": "/home/wwq416/snap/wwq/math-chain/code/results/chaingsm_test/20260525_183847/model_outputs/Qwen2.5-Math-1.5B-Instruct/zero_shot_cot/predictions.jsonl",
+      "old_count": 786,
+      "new_count": 6575
+    }
+  ],
+  "total_predictions_after_merge": 98625,
+  "overall_rows": [
+    {
+      "model_name": "Llama-3.2-1B-Instruct",
+      "method": "direct",
+      "correct": 1256,
+      "total": 6575,
+      "accuracy": 0.19102661596958176
+    },
+    {
+      "model_name": "Llama-3.2-1B-Instruct",
+      "method": "eight_shot_cot",
+      "correct": 365,
+      "total": 6575,
+      "accuracy": 0.05551330798479087
+    },
+    {
+      "model_name": "Llama-3.2-1B-Instruct",
+      "method": "zero_shot_cot",
+      "correct": 1346,
+      "total": 6575,
+      "accuracy": 0.2047148288973384
+    },
+    {
+      "model_name": "Qwen2.5-0.5B-Instruct",
+      "method": "direct",
+      "correct": 1129,
+      "total": 6575,
+      "accuracy": 0.17171102661596957
+    },
+    {
+      "model_name": "Qwen2.5-0.5B-Instruct",
+      "method": "eight_shot_cot",
+      "correct": 1387,
+      "total": 6575,
+      "accuracy": 0.21095057034220532
+    },
+    {
+      "model_name": "Qwen2.5-0.5B-Instruct",
+      "method": "zero_shot_cot",
+      "correct": 1105,
+      "total": 6575,
+      "accuracy": 0.16806083650190115
+    },
+    {
+      "model_name": "Qwen2.5-1.5B-Instruct",
+      "method": "direct",
+      "correct": 2279,
+      "total": 6575,
+      "accuracy": 0.34661596958174906
+    },
+    {
+      "model_name": "Qwen2.5-1.5B-Instruct",
+      "method": "eight_shot_cot",
+      "correct": 2424,
+      "total": 6575,
+      "accuracy": 0.36866920152091254
+    },
+    {
+      "model_name": "Qwen2.5-1.5B-Instruct",
+      "method": "zero_shot_cot",
+      "correct": 2361,
+      "total": 6575,
+      "accuracy": 0.3590874524714829
+    },
+    {
+      "model_name": "Qwen2.5-3B-Instruct",
+      "method": "direct",
+      "correct": 3266,
+      "total": 6575,
+      "accuracy": 0.4967300380228137
+    },
+    {
+      "model_name": "Qwen2.5-3B-Instruct",
+      "method": "eight_shot_cot",
+      "correct": 3312,
+      "total": 6575,
+      "accuracy": 0.5037262357414448
+    },
+    {
+      "model_name": "Qwen2.5-3B-Instruct",
+      "method": "zero_shot_cot",
+      "correct": 3208,
+      "total": 6575,
+      "accuracy": 0.4879087452471483
+    },
+    {
+      "model_name": "Qwen2.5-Math-1.5B-Instruct",
+      "method": "direct",
+      "correct": 3784,
+      "total": 6575,
+      "accuracy": 0.5755133079847908
+    },
+    {
+      "model_name": "Qwen2.5-Math-1.5B-Instruct",
+      "method": "eight_shot_cot",
+      "correct": 684,
+      "total": 6575,
+      "accuracy": 0.10403041825095057
+    },
+    {
+      "model_name": "Qwen2.5-Math-1.5B-Instruct",
+      "method": "zero_shot_cot",
+      "correct": 3851,
+      "total": 6575,
+      "accuracy": 0.5857034220532319
+    }
+  ]
+}

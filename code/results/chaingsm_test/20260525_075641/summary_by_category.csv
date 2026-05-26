@@ -1,0 +1,4 @@
+model_name,method,category,correct,total,accuracy
+Qwen2.5-0.5B-Instruct,direct,attribute_mismatch,0,1,0.0
+Qwen2.5-0.5B-Instruct,eight_shot_cot,attribute_mismatch,0,1,0.0
+Qwen2.5-0.5B-Instruct,zero_shot_cot,attribute_mismatch,0,1,0.0

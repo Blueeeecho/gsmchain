@@ -1,0 +1,16 @@
+[
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "direct",
+    "correct": 3784,
+    "total": 6575,
+    "accuracy": 0.5755133079847908
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "method": "zero_shot_cot",
+    "correct": 3851,
+    "total": 6575,
+    "accuracy": 0.5857034220532319
+  }
+]

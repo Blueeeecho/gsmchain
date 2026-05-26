@@ -1,0 +1,11 @@
+model_name,method,category,correct,total,accuracy
+Qwen2.5-Math-1.5B-Instruct,direct,attribute_mismatch,723,1316,0.5493920972644377
+Qwen2.5-Math-1.5B-Instruct,direct,independent_decoy,660,1314,0.502283105022831
+Qwen2.5-Math-1.5B-Instruct,direct,original,1097,1319,0.8316906747536013
+Qwen2.5-Math-1.5B-Instruct,direct,path_competition,680,1312,0.5182926829268293
+Qwen2.5-Math-1.5B-Instruct,direct,target_scope_misalignment,624,1314,0.4748858447488584
+Qwen2.5-Math-1.5B-Instruct,zero_shot_cot,attribute_mismatch,740,1316,0.5623100303951368
+Qwen2.5-Math-1.5B-Instruct,zero_shot_cot,independent_decoy,678,1314,0.5159817351598174
+Qwen2.5-Math-1.5B-Instruct,zero_shot_cot,original,1114,1319,0.844579226686884
+Qwen2.5-Math-1.5B-Instruct,zero_shot_cot,path_competition,680,1312,0.5182926829268293
+Qwen2.5-Math-1.5B-Instruct,zero_shot_cot,target_scope_misalignment,639,1314,0.4863013698630137
