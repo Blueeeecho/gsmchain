@@ -1,0 +1,39 @@
+# Python cache and local runtime artifacts
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+tmp/
+.cache/
+
+# Training and evaluation outputs
+outputs/
+code/results/
+
+# Large model/checkpoint artifacts
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+checkpoint-*/
+checkpoints/
+global_step_*/
+
+# Local environment files
+.env
+.env.*
+*.swp
+*.swo
+
+# Local worktrees
+.worktrees/
+worktrees/
