@@ -14,6 +14,11 @@ remote training paths submit cleanly from this repository:
 The reference directory `Noise_math_data-main/` stays in the repository until
 these paths are validated against the remote server assumptions.
 
+The design also protects the local training path. Local ChainGSM training has
+moved to the existing `math_chain_verl` conda environment at
+`/home/wwq416/miniconda3/envs/math_chain_verl`; remote alignment must not
+reintroduce `math-noise` defaults or weaken the local verl/vLLM setup.
+
 ## Goals
 
 - Centralize remote server defaults so the four submission scripts share the
@@ -25,6 +30,8 @@ these paths are validated against the remote server assumptions.
   modules, or modify SLURM configuration.
 - Make each submission command inspectable before it is submitted.
 - Document any mismatch that cannot be fixed from this repository.
+- Keep local scripts and documentation aligned with the current
+  `math_chain_verl` environment.
 
 ## Non-Goals
 
@@ -33,6 +40,8 @@ these paths are validated against the remote server assumptions.
 - Do not require a new CUDA module or package install.
 - Do not run full training as the initial validation target.
 - Do not rewrite the local training pipeline.
+- Do not change the local `math_chain_verl` environment or install packages in
+  it as part of this alignment work.
 
 ## Remote Server Baseline
 
@@ -52,6 +61,33 @@ The reference scripts indicate this remote shape:
 - Resource baseline: 4 A100 GPUs, 128 CPUs, 256GB memory
 
 These values become configurable defaults in the ChainGSM remote layer.
+
+## Local Environment Baseline
+
+Local training and evaluation should consistently use:
+
+```text
+Local conda env: /home/wwq416/miniconda3/envs/math_chain_verl
+Local Python: /home/wwq416/miniconda3/envs/math_chain_verl/bin/python
+Local verl source: /home/wwq416/snap/wwq/verl_math_chain
+Local project root: /home/wwq416/snap/wwq/math-chain
+```
+
+Local scripts already expected to use this environment:
+
+```text
+train_scripts/local/run_preprocess.sh
+train_scripts/local/run_sft.sh
+train_scripts/local/run_dpo.sh
+train_scripts/local/run_grpo.sh
+train_scripts/local/run_grpo_verl.sh
+train_scripts/local/run_sft_then_grpo.sh
+```
+
+The implementation plan should verify and, where needed, update local docs and
+scripts so they do not point users back to `math-noise`. Known stale references
+exist in older training/evaluation docs and should be reconciled with the root
+README.
 
 ## Architecture
 
@@ -190,6 +226,28 @@ python3 -m verl.trainer.main_ppo \
 
 The chained path uses the stage 1 SFT checkpoint as the stage 2 GRPO model path.
 
+### Local Script Alignment
+
+Local alignment will stay smaller than remote alignment. It will verify that
+local scripts:
+
+- Default `PYTHON` to
+  `/home/wwq416/miniconda3/envs/math_chain_verl/bin/python`.
+- Preserve local CUDA/vLLM helper variables already required for the RTX 5090
+  path:
+  - `CUDA_MODULE_LOADING=LAZY`
+  - `CUDA_HOME=/home/wwq416/miniconda3/envs/math_chain_verl`
+  - `FLASHINFER_CUDA_ARCH_LIST=12.0f`
+  - `LD_LIBRARY_PATH=/home/wwq416/miniconda3/envs/math_chain_verl/lib`
+- Keep local verl GRPO using
+  `/home/wwq416/snap/wwq/verl_math_chain`.
+- Keep local output paths under `outputs/train/local/<method>/<model>/<run_name>/<run_id>`.
+- Do not inherit remote A100 SLURM settings.
+
+Local documentation should describe `math_chain_verl` as the single current
+local environment. Any `math-noise` references should either be removed or
+clearly marked as historical if still needed for old result reproduction.
+
 ## Error Handling
 
 Because the remote environment is fixed, the scripts must not attempt to repair
@@ -213,9 +271,12 @@ Submission fails on hard preflight failures unless the user explicitly sets
 Local verification:
 
 - Shell syntax check each remote script with `bash -n`.
+- Shell syntax check local training scripts with `bash -n`.
 - Run `DRY_RUN=1 SKIP_PREFLIGHT=1` for each submit script to verify command
   construction without contacting SLURM.
 - Run `preflight_remote.sh --help` or equivalent usage output locally.
+- Verify local scripts resolve `PYTHON` to `math_chain_verl` by default without
+  launching full training.
 
 Remote verification:
 
@@ -232,6 +293,8 @@ Remote verification:
 - Four submit scripts share one remote configuration layer.
 - Four submit scripts support dry-run and preflight.
 - Four dry-runs produce commands with the expected A100 SLURM resources.
+- Local scripts remain configured for `math_chain_verl`, not `math-noise`.
+- Local docs no longer give contradictory current-environment instructions.
 - Preflight reports all non-fixable remote mismatches clearly.
 - At least the GRPO verl + vLLM chain can be smoke-submitted from the current
   repository once the remote server has the required data/model paths.
