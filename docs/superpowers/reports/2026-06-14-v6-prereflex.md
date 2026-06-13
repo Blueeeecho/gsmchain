@@ -285,6 +285,97 @@ setsid bash -c '
 
 ---
 
+
+---
+
+## 4.4 关键发现: sft_2epoch/best + 8-shot CoT = 11% (远低于 base 0.5B 24.55%)
+
+> 2026-06-14 06:14 ~ 06:19 评测, 跑到 4224/5467 sample 时停掉 (partial 数据)
+
+| 类别 | partial 4224/5467 (无 RL) | 全量 5467 推算 |
+|---|---:|---:|
+| **overall** | **0.1113** (471/4224) | ~0.115 |
+| **original** | **0.1296** (171/1319, 全部完成) | **0.1296** |
+| independent_decoy | 0.0988 (75/759) | ~0.105 |
+| attribute_mismatch | 0.0919 (65/707) | ~0.097 |
+| path_competition | 0.1184 (83/701) | ~0.125 |
+| target_scope_misalignment | 0.1030 (76/738) | ~0.109 |
+
+**对比**:
+- 0.5B base + 8-shot CoT 原生 (无 SFT, 无 RL): overall 0.2455 / original 0.4329
+- **sft_2epoch/best + 8-shot CoT (无 RL): overall 0.111 / original 0.130** ❌
+- **SFT 摧毁了 0.5B 的 8-shot CoT 能力, 13pp overall / 30pp original 损失**
+
+**根因**:
+- sft_2epoch 训练数据是 JSON schema 协议 (selected_steps / final_expression / 等)
+- 模型学到"必须先输出 JSON 字段, 不能直接 reasoning"
+- 8-shot CoT 是自由推理, 模型不知道"用自然语言算", 输出长算式 + 撞 max_tokens
+- 1385/4224 (32.8%) 撞 max_tokens=512, mean raw_output len 559, 答非所问
+
+**含义 (对 v6 决策)**:
+- 用户指定 v6 起点 = sft_2epoch/best, **这个起点本身在 8-shot 协议下就是 11% 起点**
+- 即使 v6 reward 设计完美, RL 也只能"在 11% 起点上优化", **撞 30-35% 已经是 0.5B + 8-shot 协议 + JSON 训练污染下的理论上限**
+- **v6 起点需要重新讨论**
+
+---
+
+## 4.5 v6 起点重新决策 (候选 D / E / F)
+
+### 候选 D: 起点换回 0.5B 原生 base (不上 SFT)
+
+| 项 | 值 |
+|---|---|
+| 起点 | `/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct` (HF 原始, 无任何 SFT/RL) |
+| 8-shot CoT 起点 | overall 0.2455 / original 0.4329 (已实测) |
+| v6 GRPO 400 步后预期 | overall 30-35% / original 50-55% |
+| 跟 0.46 目标距离 | overall 差 11-16pp, **0.46 仍不现实** (但比 sft2 起点好) |
+| 优势 | 不受 SFT 协议干扰, 8-shot CoT 协议原生 0.5B 就能 24.55% |
+| 劣势 | 起点 0.5B base 不受 SFT 监督, 可能输出不稳定 |
+
+### 候选 E: 0.5B base + 8-shot CoT SFT 1 epoch (再 GRPO)
+
+| 项 | 值 |
+|---|---|
+| 步骤 1 | 0.5B base + 8-shot CoT SFT 1 epoch (用 0.5B base 自己生成的 8-shot CoT trace 当 SFT 数据, 过滤对的) |
+| 步骤 2 | SFT 起点 + v6 GRPO 400 步 |
+| 预期 | SFT 1 epoch 后 overall 28-32% / original 50-55% (跟 base 24.55% 比, +4-8pp), GRPO 后 35-40% / 55-60% |
+| 优势 | SFT 让模型先学会 8-shot 协议, GRPO 接力稳定 |
+| 劣势 | SFT 1 epoch 需要 1-2h 准备 (生成 trace + 训练), 总时间 4-5h |
+
+### 候选 F: sft_2epoch/best 起点 + 加 MAX_RESPONSE_LENGTH 1024 (快速试)
+
+| 项 | 值 |
+|---|---|
+| 起点 | sft_2epoch/best (用户原始指定) |
+| 改动 | MAX_RESPONSE_LENGTH 512 → 1024 (让模型有空间输出"残废"的 JSON 残留) |
+| 预期 | 起点涨到 13-15% (撞 1024 比例从 33% 降到 10%), GRPO 400 步后 18-25% |
+| 优势 | 跟用户原指令最贴近, 不改 SFT 起点 |
+| 劣势 | 协议冲突根本未解决, 涨点空间小 |
+
+### 4.5.1 三个候选决策维度
+
+| 维度 | D (0.5B base) | E (SFT 1 epoch) | F (sft2 + 长 resp) |
+|---|---|---|---|
+| 准备时间 | 0 (现成) | 1-2h SFT + 1h prep | 5min (改 1 个参数) |
+| 400 步后 overall | 30-35% | 35-40% | 18-25% |
+| 400 步后 original | 50-55% | 55-60% | 20-30% |
+| 0.46 目标概率 | 5-10% | 10-15% | < 1% |
+| **建议优先级** | ⭐⭐⭐ (推荐) | ⭐⭐ (备选) | ⭐ (不推荐) |
+
+**核心判断**:
+- **D (0.5B base) 是最干净的 v6 起点** — 不受 SFT 协议干扰, 8-shot CoT 协议原生 0.5B 就能 24.55%
+- D 跑 400 步后, 0.5B + 8-shot CoT 整体上限应该到 30-35% (跟 base 24.55% 比 +6-10pp)
+- 0.46 目标在 0.5B 用户约束下仍然不现实, 但 D 比 sft_2epoch 起点**离 0.46 近 20pp**
+- E (SFT 1 epoch) 是更激进方案, 准备时间 +1.5h, 收益 +5pp overall (35-40%), 但需要先生成 8-shot CoT trace 数据
+
+### 4.5.2 现实目标 (0.5B 用户约束下)
+
+- 0.5B + 8-shot CoT + GRPO 400 步后, 现实上限: **overall 35-40% / original 55-60%**
+- 0.46 目标 = overall ≥ 46%, 需要涨 6-11pp — 在 0.5B 上**做不到**
+- 建议把"目标"从 0.46 overall 改为 **"逼近 0.5B + 8-shot CoT + GRPO 上限"** (overall 35-40%, original 55-60%)
+
+---
+
 ## 9. 决策记录 (2026-06-14 06:30)
 
 - ✅ 2026-06-14 02:49-04:41: v4 400 步训练 (NEUTRAL prompt, 跟 v3 比没破天花板)

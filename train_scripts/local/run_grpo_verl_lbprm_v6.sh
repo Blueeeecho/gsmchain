@@ -127,14 +127,14 @@ if [[ "$EVAL_BASELINE" == "1" ]]; then
   echo "=== Baseline eval (sft_2epoch/best with 8-shot CoT) ==="
   BASELINE_DIR="$EVAL_DIR/baseline"
   mkdir -p "$BASELINE_DIR"
-  if cd "$ROOT" && PYTHONPATH="$ROOT" "$PYTHON" -m code.eval_chaingsm_base_8shot \
+  if cd "$ROOT" && "$PYTHON" code/eval_chaingsm_base_8shot.py \
     --data-path "$EVAL_DATA_PATH" \
     --run-dir "$BASELINE_DIR" \
     --output-root "$EVAL_DIR" \
-    --limit -1 \
+    --limit 6000 \
     --batch-size $EVAL_BATCH_SIZE \
     --gpu-memory-utilization $EVAL_GPU_MEM_UTIL \
-    --model "Qwen2.5-0.5B-Instruct@$MODEL" > "$LOG_DIR/baseline_eval.log" 2>&1; then
+    --model "Qwen2.5-0.5B-Instruct=$MODEL" > "$LOG_DIR/baseline_eval.log" 2>&1; then
     if [[ -f "$BASELINE_DIR/summary_overall.json" ]]; then
       echo "  baseline eval done: $BASELINE_DIR/summary_overall.json"
     else
@@ -244,14 +244,14 @@ for STEP_DIR in $(ls -d $CKPT_DIR/global_step_* 2>/dev/null | sort); do
   echo ""
   echo "=== Evaluating $STEP_NAME (8-shot CoT, code/eval_chaingsm_base_8shot.py) ==="
   mkdir -p "$EVAL_STEP_DIR"
-  if cd "$ROOT" && PYTHONPATH="$ROOT" "$PYTHON" -m code.eval_chaingsm_base_8shot \
+  if cd "$ROOT" && "$PYTHON" code/eval_chaingsm_base_8shot.py \
     --data-path "$EVAL_DATA_PATH" \
     --run-dir "$EVAL_STEP_DIR" \
     --output-root "$EVAL_DIR" \
-    --limit -1 \
+    --limit 6000 \
     --batch-size $EVAL_BATCH_SIZE \
     --gpu-memory-utilization $EVAL_GPU_MEM_UTIL \
-    --model "Qwen2.5-0.5B-Instruct@$HF_MODEL_DIR" > "$LOG_DIR/eval_step_${STEP_NUM}.log" 2>&1; then
+    --model "Qwen2.5-0.5B-Instruct=$HF_MODEL_DIR" > "$LOG_DIR/eval_step_${STEP_NUM}.log" 2>&1; then
     if [[ -f "$EVAL_STEP_DIR/summary_overall.json" ]]; then
       OVERALL_ACC=$(cat "$EVAL_STEP_DIR/summary_overall.json" | "$PYTHON" -c "import json,sys; print(json.load(sys.stdin)[0]['accuracy'])" 2>/dev/null || echo "?")
       ORIG_ACC=$(cat "$EVAL_STEP_DIR/summary_by_category.json" | "$PYTHON" -c "import json,sys; rows=json.load(sys.stdin); orig=[r for r in rows if r['category']=='original']; print(orig[0]['accuracy'] if orig else 0)" 2>/dev/null || echo "?")
