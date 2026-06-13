@@ -1,0 +1,23 @@
+{
+  "expected_original_count": 0,
+  "actual_original_count": 0,
+  "expected_variant_count": 3090,
+  "actual_variant_count": 3070,
+  "total_records": 3070,
+  "failed_count": 20,
+  "category_counts": {
+    "path_competition": 808,
+    "attribute_mismatch": 783,
+    "target_scope_misalignment": 756,
+    "independent_decoy": 723
+  },
+  "output_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/failed_retry_json_full_no_think_all3090/failed_retry_json_full_no_think_all3090_3090.jsonl",
+  "sorted_output_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/failed_retry_json_full_no_think_all3090/failed_retry_json_full_no_think_all3090_3090.sorted.jsonl",
+  "selected_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/raw/selected_failed_retry_json_full_no_think_all3090_all.jsonl",
+  "input_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/raw/failed_requests_gsm8k_test_full_all.jsonl",
+  "run_name": "failed_retry_json_full_no_think_all3090",
+  "thinking": "disabled",
+  "seed": 42,
+  "max_workers": 4,
+  "generator_model": "deepseek-v4-flash"
+}

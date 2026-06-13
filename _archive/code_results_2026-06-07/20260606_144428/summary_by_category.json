@@ -1,0 +1,227 @@
+[
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "attribute_mismatch",
+    "correct": 247,
+    "total": 1316,
+    "accuracy": 0.18768996960486323
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "independent_decoy",
+    "correct": 179,
+    "total": 1314,
+    "accuracy": 0.13622526636225266
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "original",
+    "correct": 582,
+    "total": 1319,
+    "accuracy": 0.44124336618650495
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "path_competition",
+    "correct": 228,
+    "total": 1312,
+    "accuracy": 0.17378048780487804
+  },
+  {
+    "model_name": "Qwen2.5-0.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "target_scope_misalignment",
+    "correct": 203,
+    "total": 1314,
+    "accuracy": 0.15449010654490106
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "attribute_mismatch",
+    "correct": 365,
+    "total": 1316,
+    "accuracy": 0.2773556231003039
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "independent_decoy",
+    "correct": 275,
+    "total": 1314,
+    "accuracy": 0.20928462709284626
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "original",
+    "correct": 706,
+    "total": 1319,
+    "accuracy": 0.535253980288097
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "path_competition",
+    "correct": 320,
+    "total": 1312,
+    "accuracy": 0.24390243902439024
+  },
+  {
+    "model_name": "Qwen2.5-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "target_scope_misalignment",
+    "correct": 259,
+    "total": 1314,
+    "accuracy": 0.19710806697108066
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "attribute_mismatch",
+    "correct": 85,
+    "total": 1316,
+    "accuracy": 0.06458966565349544
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "independent_decoy",
+    "correct": 84,
+    "total": 1314,
+    "accuracy": 0.0639269406392694
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "original",
+    "correct": 154,
+    "total": 1319,
+    "accuracy": 0.11675511751326763
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "path_competition",
+    "correct": 81,
+    "total": 1312,
+    "accuracy": 0.06173780487804878
+  },
+  {
+    "model_name": "Qwen2.5-Math-1.5B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "target_scope_misalignment",
+    "correct": 72,
+    "total": 1314,
+    "accuracy": 0.0547945205479452
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-3B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "attribute_mismatch",
+    "correct": 649,
+    "total": 1316,
+    "accuracy": 0.493161094224924
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-3B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "independent_decoy",
+    "correct": 537,
+    "total": 1314,
+    "accuracy": 0.408675799086758
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-3B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "original",
+    "correct": 1090,
+    "total": 1319,
+    "accuracy": 0.8263836239575436
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-3B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "path_competition",
+    "correct": 616,
+    "total": 1312,
+    "accuracy": 0.4695121951219512
+  },
+  {
+    "model_name": "Qwen2.5-3B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-3B-Instruct",
+    "prompt_profile": "qwen_single_turn_8shot_chat",
+    "category": "target_scope_misalignment",
+    "correct": 510,
+    "total": 1314,
+    "accuracy": 0.3881278538812785
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/llama/Llama-3.2-1B-Instruct",
+    "prompt_profile": "llama_lm_eval_multiturn_8shot_single_bos",
+    "category": "attribute_mismatch",
+    "correct": 252,
+    "total": 1316,
+    "accuracy": 0.19148936170212766
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/llama/Llama-3.2-1B-Instruct",
+    "prompt_profile": "llama_lm_eval_multiturn_8shot_single_bos",
+    "category": "independent_decoy",
+    "correct": 211,
+    "total": 1314,
+    "accuracy": 0.16057838660578386
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/llama/Llama-3.2-1B-Instruct",
+    "prompt_profile": "llama_lm_eval_multiturn_8shot_single_bos",
+    "category": "original",
+    "correct": 603,
+    "total": 1319,
+    "accuracy": 0.45716451857467777
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/llama/Llama-3.2-1B-Instruct",
+    "prompt_profile": "llama_lm_eval_multiturn_8shot_single_bos",
+    "category": "path_competition",
+    "correct": 261,
+    "total": 1312,
+    "accuracy": 0.1989329268292683
+  },
+  {
+    "model_name": "Llama-3.2-1B-Instruct",
+    "model_path": "/home/wwq416/snap/wwq/model/llama/Llama-3.2-1B-Instruct",
+    "prompt_profile": "llama_lm_eval_multiturn_8shot_single_bos",
+    "category": "target_scope_misalignment",
+    "correct": 240,
+    "total": 1314,
+    "accuracy": 0.182648401826484
+  }
+]

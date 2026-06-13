@@ -1,0 +1,9 @@
+stage1_sft:
+  config: /home/wwq416/snap/wwq/math-chain/train_configs/local/sft.yaml
+  data_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/sft_then_grpo_stage1_sft.jsonl
+  output_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft_then_grpo/Qwen2.5-0.5B-Instruct/default/stage1_sft
+stage2_grpo:
+  config: /home/wwq416/snap/wwq/math-chain/train_configs/local/grpo.yaml
+  data_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/sft_then_grpo_stage2_grpo.jsonl
+  output_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft_then_grpo/Qwen2.5-0.5B-Instruct/default/stage2_grpo
+

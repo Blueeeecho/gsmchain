@@ -37,3 +37,6 @@ global_step_*/
 # Local worktrees
 .worktrees/
 worktrees/
+
+# Reference repo (do not track)
+Noise_math_data-main/

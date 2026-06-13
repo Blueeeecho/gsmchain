@@ -1,0 +1,8 @@
+stage1_sft:
+  config: ${oc.env:REMOTE_ROOT}/train_configs/remote/sft_verl.yaml
+  output_dir: ${oc.env:REMOTE_OUTPUT_DIR}/sft_then_grpo/stage1_sft
+stage2_grpo:
+  config: ${oc.env:REMOTE_ROOT}/train_configs/remote/grpo_verl_vllm.yaml
+  model_path: ${oc.env:REMOTE_OUTPUT_DIR}/sft_then_grpo/stage1_sft/checkpoints
+  output_dir: ${oc.env:REMOTE_OUTPUT_DIR}/sft_then_grpo/stage2_grpo
+

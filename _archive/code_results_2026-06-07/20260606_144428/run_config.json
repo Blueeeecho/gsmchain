@@ -1,0 +1,59 @@
+{
+  "created_at": "2026-06-06T15:01:54",
+  "data_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/gsm8k_test_full/gsm8k_test_all.jsonl",
+  "example_count": 6575,
+  "models": [
+    {
+      "model_name": "Qwen2.5-0.5B-Instruct",
+      "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct",
+      "prompt_profile": "qwen_single_turn_8shot_chat"
+    },
+    {
+      "model_name": "Qwen2.5-1.5B-Instruct",
+      "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-1.5B-Instruct",
+      "prompt_profile": "qwen_single_turn_8shot_chat"
+    },
+    {
+      "model_name": "Qwen2.5-Math-1.5B-Instruct",
+      "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct",
+      "prompt_profile": "qwen_single_turn_8shot_chat"
+    },
+    {
+      "model_name": "Qwen2.5-3B-Instruct",
+      "model_path": "/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-3B-Instruct",
+      "prompt_profile": "qwen_single_turn_8shot_chat"
+    },
+    {
+      "model_name": "Llama-3.2-1B-Instruct",
+      "model_path": "/home/wwq416/snap/wwq/model/llama/Llama-3.2-1B-Instruct",
+      "prompt_profile": "llama_lm_eval_multiturn_8shot_single_bos"
+    }
+  ],
+  "generation": {
+    "temperature": 0.0,
+    "top_p": 1.0,
+    "max_tokens": 512,
+    "seed": 42
+  },
+  "runtime": {
+    "batch_size": 64,
+    "tensor_parallel_size": 1,
+    "gpu_memory_utilization": null,
+    "gpu_memory_utilization_candidates": [
+      0.8,
+      0.7,
+      0.6,
+      0.55,
+      0.5,
+      0.45,
+      0.4,
+      0.35,
+      0.3,
+      0.25
+    ],
+    "dtype": "auto",
+    "max_model_len": 4096,
+    "enforce_eager": false
+  },
+  "resume_command": "/home/wwq416/miniconda3/envs/math_chain_verl/bin/python /home/wwq416/snap/wwq/math-chain/code/eval_chaingsm_base_8shot.py --run-dir code/results/chaingsm_base_8shot/20260606_144428"
+}

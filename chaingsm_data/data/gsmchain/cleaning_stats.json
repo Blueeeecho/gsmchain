@@ -1,0 +1,29 @@
+{
+  "source_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/gsm8k_test_full/gsm8k_test_all.jsonl",
+  "audit_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/reports/deepseek_gold_audit/full/audit_records.jsonl",
+  "output_path": "/home/wwq416/snap/wwq/math-chain/chaingsm_data/data/gsmchain/gsm8k_test_clean.jsonl",
+  "filter_rule": "保留全部 original，仅删除审计结果 flagged=true 的变体",
+  "source_total": 6575,
+  "output_total": 5467,
+  "removed_total": 1108,
+  "source_by_category": {
+    "original": 1319,
+    "path_competition": 1312,
+    "independent_decoy": 1314,
+    "attribute_mismatch": 1316,
+    "target_scope_misalignment": 1314
+  },
+  "output_by_category": {
+    "original": 1319,
+    "path_competition": 999,
+    "independent_decoy": 1102,
+    "attribute_mismatch": 1017,
+    "target_scope_misalignment": 1030
+  },
+  "removed_by_category": {
+    "attribute_mismatch": 299,
+    "target_scope_misalignment": 284,
+    "independent_decoy": 212,
+    "path_competition": 313
+  }
+}

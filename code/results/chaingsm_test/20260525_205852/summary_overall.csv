@@ -1,3 +1,0 @@
-model_name,method,correct,total,accuracy
-Qwen2.5-Math-1.5B-Instruct,direct,3784,6575,0.5755133079847908
-Qwen2.5-Math-1.5B-Instruct,zero_shot_cot,3851,6575,0.5857034220532319

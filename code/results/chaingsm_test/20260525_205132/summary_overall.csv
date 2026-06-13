@@ -1,2 +1,0 @@
-model_name,method,correct,total,accuracy
-Qwen2.5-0.5B-Instruct,direct,1129,6575,0.17171102661596957

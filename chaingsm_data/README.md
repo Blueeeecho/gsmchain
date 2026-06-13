@@ -47,10 +47,97 @@ N original + N × 4 generated variants = 5N records
 - `path_competition`
 - `target_scope_misalignment`
 
-当前 test 全量数据为：
+test 集理论完整规模为：
 
 ```text
 1319 original + 1319 × 4 variants = 6595 records
+```
+
+当前合并后的 test 数据文件为：
+
+```text
+data/final/gsm8k_test_full/gsm8k_test_all.jsonl
+```
+
+该文件的真实统计数量为 6575 条：
+
+```text
+original: 1319
+independent_decoy: 1314
+attribute_mismatch: 1316
+path_competition: 1312
+target_scope_misalignment: 1314
+```
+
+相对理论完整规模，当前 test 合并文件少 20 个 generated variants：
+
+```text
+independent_decoy: missing 5
+attribute_mismatch: missing 3
+path_competition: missing 7
+target_scope_misalignment: missing 5
+```
+
+## 训练集单变体均衡生成
+
+训练集输入文件为：
+
+```text
+data/raw/train-00000-of-00001.jsonl
+```
+
+该文件包含 7473 条 GSM8K train 基础样本，字段格式与 test 输入一致。训练集不按 test 全量设置为每个 base problem 生成 4 类变体，而是每个 base problem 只采样 1 个 distracted variant，同时在全局保持四类变体尽量均衡：
+
+```text
+7473 original + 7473 × 1 generated variant = 14946 records
+```
+
+四类变体的类别分配由 `--balanced-one-variant` 和 `--seed 42` 固定，完整训练集的目标类别数量为：
+
+```text
+original: 7473
+independent_decoy: 1869
+attribute_mismatch: 1868
+path_competition: 1868
+target_scope_misalignment: 1868
+```
+
+类别分配会写入 selected cache，便于断点续跑和复现：
+
+```text
+data/raw/selected_gsm8k_train_balanced_one_variant_all.jsonl
+```
+
+训练集生成沿用 test 数据生成的同一套 verbose JSON generator prompt、JSON mode、本地结构校验和最终 record schema；prompt 内容不在此重复。生成时同样关闭 DeepSeek thinking，避免 reasoning token 开销和空 `content` 问题。
+
+推荐命令：
+
+```bash
+python generate_dataset.py \
+  --mode full \
+  --confirm-pilot-ok \
+  --input-path data/raw/train-00000-of-00001.jsonl \
+  --input-format jsonl \
+  --run-name gsm8k_train_balanced_one_variant \
+  --balanced-one-variant \
+  --thinking disabled \
+  --seed 42 \
+  --max-workers 8 \
+  --api-retries 2 \
+  --max-retries 2 \
+  --output-dir data/final/train_balanced_one_variant \
+  --reports-dir reports/train_balanced_one_variant \
+  --force
+```
+
+主要输出路径：
+
+```text
+data/final/train_balanced_one_variant/gsm8k_train_balanced_one_variant/gsm8k_train_balanced_one_variant_14946.jsonl
+data/final/train_balanced_one_variant/gsm8k_train_balanced_one_variant/gsm8k_train_balanced_one_variant_14946.sorted.jsonl
+reports/train_balanced_one_variant/gsm8k_train_balanced_one_variant/final_stats.json
+reports/train_balanced_one_variant/gsm8k_train_balanced_one_variant/final_summary.md
+reports/train_balanced_one_variant/gsm8k_train_balanced_one_variant/failed_generation.jsonl
 ```
 
 旧 full run 中失败的 3090 个 sample+category 请求已提取到：

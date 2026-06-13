@@ -1,0 +1,55 @@
+model:
+  model_name_or_path: /home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct
+  trust_remote_code: true
+data:
+  train_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/grpo_train.jsonl
+  max_samples: null
+output:
+  output_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/grpo/Qwen2.5-0.5B-Instruct/default
+training:
+  # max_prompt_length removed in TRL >= 1.5; prompt length is handled by tokenizer/model.
+  max_completion_length: 2048
+  num_generations: 4
+  temperature: 0.7
+  top_p: 1.0
+  num_train_epochs: 1
+  max_steps: -1
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 1.0e-6
+  logging_strategy: steps
+  logging_first_step: true
+  logging_steps: 1
+  disable_tqdm: false
+  log_level: info
+  save_strategy: "no"
+  save_total_limit: 1
+  bf16: true
+  gradient_checkpointing: true
+  report_to: []
+  remove_unused_columns: false
+reward:
+  format_weight: 0.2
+  answer_weight: 0.4
+  expression_weight: 0.2
+  trace_weight: 0.2
+  distractor_penalty: 0.3
+  invalid_reward: -0.5
+eval:
+  enabled: true
+  baseline_before_train: true
+  data_path: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/gsm8k_test_full/gsm8k_test_all.jsonl
+  method: train_json_prompt
+  limit: null
+  batch_size: 64
+  tensor_parallel_size: 1
+  gpu_memory_utilization: 0.8
+  gpu_memory_utilization_candidates: [0.8, 0.7, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25]
+  dtype: auto
+  max_model_len: null
+  max_tokens: 2048
+  top_k: 1
+  top_p: 1.0
+  seed: 42
+  trust_remote_code: true
+  offload_model_before_vllm: true

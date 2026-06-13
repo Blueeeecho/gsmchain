@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import random
 import sys
 import threading
 from collections import Counter, defaultdict
@@ -75,6 +76,25 @@ def parse_categories(value):
     if invalid:
         raise ValueError(f"Invalid categories: {', '.join(invalid)}")
     return categories
+
+
+def assign_balanced_categories(samples, categories, seed):
+    """Assign exactly one category per sample, balanced over the requested categories."""
+    if not categories:
+        raise ValueError("At least one category is required for balanced assignment.")
+
+    category_pool = []
+    while len(category_pool) < len(samples):
+        category_pool.extend(categories)
+    category_pool = category_pool[: len(samples)]
+    random.Random(seed).shuffle(category_pool)
+
+    assigned = []
+    for sample, category in zip(samples, category_pool):
+        sample_with_category = dict(sample)
+        sample_with_category["category"] = category
+        assigned.append(sample_with_category)
+    return assigned
 
 
 def run_variant_tasks(tasks, args, config, paths, write_lock, generator_client, validator_client):
@@ -582,7 +602,11 @@ def build_paths(args, sample_count=None):
         if sample_count is None:
             total_label = "unknown"
         else:
-            category_count = 1 if args.use_input_categories else len(parse_categories(args.categories))
+            category_count = (
+                1
+                if args.use_input_categories or args.balanced_one_variant
+                else len(parse_categories(args.categories))
+            )
             original_count = 0 if args.skip_originals else sample_count
             total_label = original_count + (sample_count * category_count)
         output_path = project_path(args.output_dir) / run_dir_name / f"{run_dir_name}_{total_label}.jsonl"
@@ -614,6 +638,8 @@ def run_generation(args):
 
     if args.mode == "full" and not args.confirm_pilot_ok:
         raise SystemExit("full mode requires --confirm-pilot-ok")
+    if args.balanced_one_variant and args.use_input_categories:
+        raise SystemExit("--balanced-one-variant cannot be combined with --use-input-categories")
 
     input_path = project_path(args.input_path)
     if not input_path.exists():
@@ -647,6 +673,10 @@ def run_generation(args):
         input_format=args.input_format,
         base_id_prefix=args.base_id_prefix,
     )
+    requested_categories = parse_categories(args.categories)
+    if args.balanced_one_variant:
+        samples = assign_balanced_categories(samples, requested_categories, args.seed)
+        write_jsonl(paths["selected_path"], samples)
 
     if args.output_path is None and args.mode == "full" and sample_count is None:
         paths = build_paths(args, len(samples))
@@ -687,10 +717,11 @@ def run_generation(args):
             print(f"Wrote {originals_written} original records.")
 
     tasks = []
-    requested_categories = parse_categories(args.categories)
     expected_variant_count = 0
     for sample in samples:
-        if args.use_input_categories and sample.get("category"):
+        if args.balanced_one_variant:
+            sample_categories = [sample["category"]]
+        elif args.use_input_categories and sample.get("category"):
             sample_categories = [sample["category"]]
         else:
             sample_categories = requested_categories
@@ -749,6 +780,7 @@ def parse_args(argv=None):
     parser.add_argument("--run-name", default=None)
     parser.add_argument("--base-id-prefix", default="chaingsm")
     parser.add_argument("--categories", default="all")
+    parser.add_argument("--balanced-one-variant", action="store_true")
     parser.add_argument("--use-input-categories", action="store_true")
     parser.add_argument("--skip-originals", action="store_true")
     parser.add_argument("--temperature", type=float, default=0.2)

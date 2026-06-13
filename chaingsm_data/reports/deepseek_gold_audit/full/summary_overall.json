@@ -1,0 +1,30 @@
+{
+  "total_groups": 1319,
+  "completed_groups": 1319,
+  "group_coverage": 1.0,
+  "unresolved_failures": 0,
+  "records_audited": 6575,
+  "judge_answer_correct_count": 5487,
+  "judge_answer_correct_rate": 0.8345247148288973,
+  "local_answer_match_count": 5494,
+  "local_answer_match_rate": 0.8355893536121674,
+  "problem_valid_count": 6462,
+  "problem_valid_rate": 0.9828136882129278,
+  "answer_unique_count": 6412,
+  "answer_unique_rate": 0.9752091254752852,
+  "target_preserved_count": 5536,
+  "target_preserved_rate": 0.8419771863117871,
+  "comparison_disagreement_count": 23,
+  "comparison_disagreement_rate": 0.0034980988593155894,
+  "flagged_count": 1157,
+  "flagged_rate": 0.17596958174904942,
+  "issue_type_counts": {
+    "ambiguous": 41,
+    "contradictory": 74,
+    "insufficient_information": 9,
+    "malformed": 2,
+    "none": 5439,
+    "target_changed": 923,
+    "wrong_label": 87
+  }
+}
