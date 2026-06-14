@@ -36,7 +36,7 @@ MODEL="${MODEL:-$SFT_CKPT_DIR}"
 DATA="${DATA:-${ROOT}/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/verl_grpo_train_8shot_cot.parquet}"
 
 # v8 reward
-REWARD_PATH="${REWARD_PATH:-${ROOT}/train_pipeline/reward_chaingsm_lbprm_v8_verl.py}"
+REWARD_PATH="${REWARD_PATH:-${ROOT}/train_pipeline/reward_chaingsm_lbprm_v8_1_verl.py}"
 
 # 用户授权 1000 步
 MAX_STEPS="${MAX_STEPS:-1000}"
@@ -79,7 +79,7 @@ ROLLOUT_TEMPERATURE="${ROLLOUT_TEMPERATURE:-0.9}"
 # step_count 0.05 (新, 鼓励展开算式)
 # format 0.05 (降半, base 0.5B 自由推理下基本 ok)
 FORMAT_WEIGHT="${FORMAT_WEIGHT:-0.05}"
-ANSWER_WEIGHT="${ANSWER_WEIGHT:-0.85}"
+ANSWER_WEIGHT="${ANSWER_WEIGHT:-0.55}"
 NUMERIC_CORRECTNESS_WEIGHT="${NUMERIC_CORRECTNESS_WEIGHT:-0.05}"
 STEP_COUNT_WEIGHT="${STEP_COUNT_WEIGHT:-0.05}"
 INVALID_REWARD="${INVALID_REWARD:--0.5}"
@@ -105,7 +105,7 @@ echo "MODEL=$MODEL"
 echo "DATA=$DATA"
 echo "REWARD=$REWARD_PATH"
 echo "MAX_STEPS=$MAX_STEPS SAVE_FREQ=$SAVE_FREQ"
-echo "REWARD_WEIGHTS: format=$FORMAT_WEIGHT answer=$ANSWER_WEIGHT numeric=$NUMERIC_CORRECTNESS_WEIGHT step_count=$STEP_COUNT_WEIGHT"
+echo "REWARD_WEIGHTS: format=$FORMAT_WEIGHT answer=$ANSWER_WEIGHT numeric=$NUMERIC_CORRECTNESS_WEIGHT step_count=$STEP_COUNT_WEIGHT c2a=$CHAIN_TO_ANSWER_CHECK_WEIGHT target=$TARGET_RECOGNITION_WEIGHT length=$CHAIN_LENGTH_CONSISTENCY_WEIGHT irrelevant_penalty=$IRRELEVANT_EQ_PENALTY_WEIGHT"
 echo "ACTOR_LR=$ACTOR_LR KL=$KL_LOSS_COEF ROLLOUT_N=$ROLLOUT_N"
 echo "OUTPUT_DIR=$OUTPUT_DIR"
 echo ""
@@ -172,6 +172,10 @@ cd "$ROOT"
   +custom_reward_function.reward_kwargs.answer_weight=$ANSWER_WEIGHT \
   +custom_reward_function.reward_kwargs.numeric_correctness_weight=$NUMERIC_CORRECTNESS_WEIGHT \
   +custom_reward_function.reward_kwargs.step_count_weight=$STEP_COUNT_WEIGHT \
+  +custom_reward_function.reward_kwargs.chain_to_answer_check_weight=$CHAIN_TO_ANSWER_CHECK_WEIGHT \
+  +custom_reward_function.reward_kwargs.target_recognition_weight=$TARGET_RECOGNITION_WEIGHT \
+  +custom_reward_function.reward_kwargs.chain_length_consistency_weight=$CHAIN_LENGTH_CONSISTENCY_WEIGHT \
+  +custom_reward_function.reward_kwargs.irrelevant_eq_penalty_weight=$IRRELEVANT_EQ_PENALTY_WEIGHT \
   +custom_reward_function.reward_kwargs.invalid_reward=$INVALID_REWARD \
   \
   trainer.critic_warmup=0 \
