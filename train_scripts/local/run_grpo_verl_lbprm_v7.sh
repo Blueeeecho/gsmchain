@@ -47,8 +47,8 @@ DATA="${DATA:-${ROOT}/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balan
 # v6 reward: 8-shot CoT 协议适配 (新建)
 REWARD_PATH="${REWARD_PATH:-${ROOT}/train_pipeline/reward_chaingsm_lbprm_v7_verl.py}"
 
-MAX_STEPS="${MAX_STEPS:-1000}"
-SAVE_FREQ="${SAVE_FREQ:-200}"
+MAX_STEPS="${MAX_STEPS:-500}"
+SAVE_FREQ="${SAVE_FREQ:-100}"
 
 RUN_NAME="${RUN_NAME:-grpo_verl_v7}"
 RUN_ID="${RUN_ID:-$(date +%Y%m%d_%H%M%S)}"
@@ -113,8 +113,8 @@ echo "  MODEL (起点):   $MODEL"
 echo "                   (= 0.5B base, 8-shot CoT 原生 original 0.4329)"
 echo "  DATA:           $DATA (8-shot CoT prompt)"
 echo "  REWARD:         $REWARD_PATH (v7 reward, 3 子项: format/answer/numeric)"
-echo "  MAX_STEPS:      $MAX_STEPS"
-echo "  SAVE_FREQ:      $SAVE_FREQ"
+echo "  MAX_STEPS:      $MAX_STEPS  (用户授权上限 1000, 实际跑 500)"
+echo "  SAVE_FREQ:      $SAVE_FREQ  (5 个 eval 节点: 100/200/300/400/500)"
 echo "  ROLLOUT_N:      $ROLLOUT_N"
 echo "  TRAIN_BATCH:    $TRAIN_BATCH_SIZE"
 echo "  MAX_PROMPT:     $MAX_PROMPT_LENGTH (8-shot 验证 max=1029)"
@@ -169,6 +169,7 @@ echo "=== Starting verl GRPO training (max $MAX_STEPS steps) ==="
   data.max_response_length=$MAX_RESPONSE_LENGTH \
   data.filter_overlong_prompts=True \
   data.truncation=error \
+  data.dataloader_num_workers=2 \
   \
   actor_rollout_ref.model.path="$MODEL" \
   actor_rollout_ref.model.use_remove_padding=False \
