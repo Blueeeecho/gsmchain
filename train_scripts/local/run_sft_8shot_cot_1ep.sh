@@ -7,10 +7,11 @@
 # 关键设计:
 #   - 起点: 0.5B base
 #   - SFT 数据: sft_train_v2.jsonl (14528 条, free-form CoT)
-#   - SFT 1 epoch (908 步 @ batch_size 16)
+#   - SFT 1 epoch (908 effective steps @ effective_batch_size 16)
 #   - LR 2e-5
 #   - MAX_LENGTH 1024
-#   - 关 eval 回调 (避免跟后续 SFT ckpt 评测冲突)
+#   - 关 eval 回调
+#   - batch_size 4 + grad_accum 4 = effective 16 (避免 OOM)
 #
 # 用法:
 #   bash train_scripts/local/run_sft_8shot_cot_1ep.sh 2>&1 | tee /tmp/sft_v8.log
@@ -23,10 +24,10 @@ PYTHON="${PYTHON:-/home/wwq416/miniconda3/envs/math_chain_verl/bin/python}"
 MODEL="${MODEL:-/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct}"
 DATA="${DATA:-${ROOT}/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/sft_train_v2.jsonl}"
 
-# 14528 / 16 = 908 步 (1 epoch)
+# 14528 / 16 = 908 effective steps
 MAX_STEPS="${MAX_STEPS:-908}"
-BATCH_SIZE="${BATCH_SIZE:-16}"
-GRAD_ACCUM="${GRAD_ACCUM:-1}"
+BATCH_SIZE="${BATCH_SIZE:-4}"
+GRAD_ACCUM="${GRAD_ACCUM:-4}"
 LR="${LR:-2e-5}"
 MAX_LENGTH="${MAX_LENGTH:-1024}"
 
@@ -38,17 +39,20 @@ OUTPUT_DIR="${OUTPUT_BASE_DIR}/${RUN_ID}"
 [[ -f "$DATA" ]] || { echo "ERROR: data not found: $DATA" >&2; exit 1; }
 [[ -d "$MODEL" ]] || { echo "ERROR: model not found: $MODEL" >&2; exit 1; }
 
-# CUDA env (跟 run_sft.sh 一致)
+# CUDA env
 export PATH="/home/wwq416/miniconda3/envs/math_chain_verl/bin:${PATH}"
 export CUDA_HOME="/home/wwq416/miniconda3/envs/math_chain_verl"
 export FLASHINFER_CUDA_ARCH_LIST="12.0f"
 export LD_LIBRARY_PATH="/home/wwq416/miniconda3/envs/math_chain_verl/lib:${LD_LIBRARY_PATH:-}"
 export CUDA_MODULE_LOADING=LAZY
+# 防显存碎片
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 echo "=== v8 SFT 1 epoch 8-shot CoT ==="
 echo "MODEL=$MODEL"
 echo "DATA=$DATA"
-echo "MAX_STEPS=$MAX_STEPS BATCH_SIZE=$BATCH_SIZE LR=$LR MAX_LENGTH=$MAX_LENGTH"
+echo "MAX_STEPS=$MAX_STEPS BATCH_SIZE=$BATCH_SIZE GRAD_ACCUM=$GRAD_ACCUM LR=$LR MAX_LENGTH=$MAX_LENGTH"
+echo "EFFECTIVE_BATCH_SIZE=$((BATCH_SIZE*GRAD_ACCUM))"
 echo "OUTPUT_DIR=$OUTPUT_DIR"
 echo ""
 
