@@ -46,6 +46,43 @@ Problem:
 {question}
 """
 
+
+# Neutral prompt (target-conditioned reasoning, no distractor/ignore terms).
+# Added 2026-06-08: matches SFT neutral_prompts data and the
+# "LB-PRM-style chain-structure reward" approach recommended by the advisor.
+# We keep the original SYSTEM_PROMPT / USER_TEMPLATE unchanged for backward
+# compat with other callers; the new constants are what `eval_vllm_chaingsm`
+# (method=train_json_prompt) and the patched GRPO parquet use.
+NEUTRAL_SYSTEM_PROMPT = (
+    "You are an expert grade-school math solver. Identify the quantity being asked, "
+    "solve it carefully step by step, and follow the requested output format."
+)
+
+NEUTRAL_USER_TEMPLATE = """Solve the following grade-school math problem.
+First identify the target quantity asked by the question. Then write the calculation steps needed to compute that target.
+Return one valid JSON object with this schema:
+{{
+  "target": "short description of the quantity being asked",
+  "selected_steps": [
+    {{
+      "variable": "short variable name",
+      "description": "mathematical meaning of this step",
+      "expression": "arithmetic expression",
+      "value": "computed value"
+    }}
+  ],
+  "final_expression": "arithmetic expression that computes the answer",
+  "answer": "final numeric answer"
+}}
+Requirements:
+- The JSON must be parseable.
+- Use meaningful step descriptions.
+- Do not include calculations that are not needed for the target quantity.
+- Do not add text outside the JSON object.
+Problem:
+{question}
+"""
+
 _OPS = {
     ast.Add: operator.add,
     ast.Sub: operator.sub,

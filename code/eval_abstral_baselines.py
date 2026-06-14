@@ -20,7 +20,7 @@ from typing import Any, Iterable
 import sympy as sp
 from tqdm import tqdm
 
-from gsm_answer_extractor import extract_answer, is_correct, normalize_answer
+from gsm_answer_extractor import extract_answer, extract_number, is_correct, normalize_answer
 
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 os.environ.setdefault("VLLM_WORKER_MULTIPROC_METHOD", "spawn")

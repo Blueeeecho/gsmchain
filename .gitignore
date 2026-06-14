@@ -40,3 +40,15 @@ worktrees/
 
 # Reference repo (do not track)
 Noise_math_data-main/
+
+# Generated training data (large, regenerable from raw + preprocess)
+chaingsm_data/data/final/rl_preprocessed/
+chaingsm_data/data/final/train_balanced_one_variant/
+chaingsm_data/data/final/gsm8k_test_full/
+
+# Test set (8.9M, tracked via source + cleaning)
+chaingsm_data/data/gsmchain/gsm8k_test_clean.jsonl
+
+# Training data selection (14946 subset, regenerable from raw)
+chaingsm_data/data/raw/selected_gsm8k_train_balanced_one_variant_all.jsonl
+chaingsm_data/reports/train_balanced_one_variant/

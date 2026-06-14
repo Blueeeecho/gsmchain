@@ -17,9 +17,8 @@ LOCAL_SCRIPTS = [
 CURRENT_DOCS = [
     "README.md",
     "train_readme.md",
-    "baseline_readme.md",
-    "code/README.md",
-]
+]  # baseline_readme.md 与 code/README.md 已移到 _archive/,不再是 "current docs"
+
 
 
 def test_local_scripts_default_to_math_chain_verl_python() -> None:

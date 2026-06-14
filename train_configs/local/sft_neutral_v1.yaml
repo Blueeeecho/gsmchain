@@ -1,0 +1,38 @@
+model:
+  model_name_or_path: /home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct
+  trust_remote_code: true
+data:
+  train_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/sft_train_neutral.jsonl
+  max_samples: null
+output:
+  output_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft/Qwen2.5-0.5B-Instruct/sft_neutral_v1
+training:
+  max_length: 3072
+  completion_only_loss: true
+  packing: false
+  num_train_epochs: 1
+  max_steps: -1
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 16
+  learning_rate: 2.0e-5
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+  logging_strategy: steps
+  logging_first_step: true
+  logging_steps: 10
+  disable_tqdm: false
+  log_level: info
+  save_strategy: "no"
+  save_total_limit: 1
+  bf16: true
+  gradient_checkpointing: true
+  report_to: []
+  remove_unused_columns: false
+lora:
+  enabled: false
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: all-linear
+eval:
+  enabled: false

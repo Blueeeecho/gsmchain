@@ -23,7 +23,12 @@ from vllm import LLM, SamplingParams
 from gsm_answer_extractor import extract_answer as extract_text_answer
 from gsm_answer_extractor import is_correct
 from train_pipeline.eval_constants import DEFAULT_TEST_DATA
-from train_pipeline.preprocess_chaingsm import SYSTEM_PROMPT, USER_TEMPLATE
+from train_pipeline.preprocess_chaingsm import (
+    SYSTEM_PROMPT,
+    USER_TEMPLATE,
+    NEUTRAL_SYSTEM_PROMPT,
+    NEUTRAL_USER_TEMPLATE,
+)
 
 
 @dataclass
@@ -66,9 +71,11 @@ def load_examples(data_path: str | Path, limit: int | None = None) -> list[EvalE
 
 def build_messages(method: str, question: str) -> list[dict[str, str]]:
     if method == "train_json_prompt":
+        # 2026-06-08: use the neutral prompt so eval-time prompt matches
+        # the SFT/GRPO training-time prompt (no distractor / ignore / "JSON only" terms).
         return [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": USER_TEMPLATE.format(question=question.strip())},
+            {"role": "system", "content": NEUTRAL_SYSTEM_PROMPT},
+            {"role": "user", "content": NEUTRAL_USER_TEMPLATE.format(question=question.strip())},
         ]
     if method == "direct":
         return [
@@ -300,7 +307,7 @@ def evaluate_with_vllm(
                 used_gpu_memory_utilization = candidate
                 break
             except Exception as exc:
-                attempt_errors.append({"gpu_memory_utilization": candidate, "error": repr(exc)})
+                import traceback as _tb; attempt_errors.append({"gpu_memory_utilization": candidate, "error": repr(exc), "traceback": _tb.format_exc()})
                 print(f"[eval] vLLM eval failed at gpu_memory_utilization={candidate}: {exc!r}", flush=True)
             finally:
                 if llm is not None:
