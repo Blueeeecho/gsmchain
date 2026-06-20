@@ -1,0 +1,102 @@
+# verl GRPO V14 training config for ChainGSM on SLURM (multi-GPU)
+#
+# V14 设计: 4 字段 JSON (target/use_facts/exclude_facts/reasoning) + 12 rules
+#   + prose-表达式 物理交错 reasoning
+# Reward 公式: 3.0*r_answer + 1.5*r_step_value + 0.5*r_path_alignment - 0.5*r_distractor_leak
+#   (4 项, 跟 V12 公式同构, 信号源重做)
+# 起点: Qwen2.5-0.5B-Instruct base (跳过 SFT)
+# 数据: chaingsm_data/data/final/grpo/grpo_v14_reasoning.parquet (3051 行, 5 类别)
+# 评测: cot_brackets_v14_reasoning method
+#
+# 关键差异 (vs V12 / V13):
+# 1. REMOTE_DATA_DIR 默认指 grpo_v14_reasoning.parquet (V12 是 v12_json, V13 是 v13_json)
+# 2. REMOTE_REWARD_PATH 默认指 reward_chaingsm_v14_reasoning_verl.py
+# 3. custom_reward_function.reward_kwargs 4 项 (跟 V12i 同构, 但 reward 文件不同)
+# 4. 训练量 3 epoch (V12/V13 是 2 epoch) - V14 prompt 更长, 留更多训练步数
+# 5. save_freq 300 (跟 V12/V13 一致)
+
+data:
+  train_files: ${oc.env:REMOTE_DATA_DIR}/verl_grpo_train.parquet
+  val_files: ${oc.env:REMOTE_DATA_DIR}/verl_grpo_train.parquet
+  train_batch_size: 4
+  val_batch_size: 4
+  max_prompt_length: 2048
+  max_response_length: 768
+  filter_overlong_prompts: true
+  truncation: error
+
+actor_rollout_ref:
+  hybrid_engine: true
+  model:
+    path: ${oc.env:REMOTE_MODEL_PATH}
+    use_remove_padding: false
+    enable_gradient_checkpointing: true
+  actor:
+    optim:
+      lr: 5.0e-7
+      weight_decay: 0.1
+      betas: [0.9, 0.99]
+      lr_scheduler_type: cosine
+      lr_warmup_steps_ratio: 0.1
+      clip_grad: 0.1
+    ppo_mini_batch_size: 4
+    ppo_micro_batch_size_per_gpu: 1
+    use_kl_loss: true
+    kl_loss_coef: 0.04
+    kl_loss_type: low_var_kl
+    clip_ratio: 0.2
+    entropy_coeff: 0
+    loss_agg_mode: token-mean
+    fsdp_config:
+      param_offload: true
+      optimizer_offload: true
+    checkpoint:
+      save_contents: ['model', 'optimizer', 'extra', 'hf_model']
+      load_contents: ['model', 'optimizer', 'extra']
+  rollout:
+    name: vllm
+    tensor_model_parallel_size: ${oc.env:TP_SIZE}
+    gpu_memory_utilization: 0.4
+    n: ${oc.env:ROLLOUT_N}
+    temperature: 0.9
+    top_p: 1.0
+    top_k: 50
+    enforce_eager: true
+    free_cache_engine: true
+    log_prob_micro_batch_size_per_gpu: 1
+    enable_sleep_mode: true
+  ref:
+    log_prob_micro_batch_size_per_gpu: 1
+    fsdp_config:
+      param_offload: true
+
+reward_model:
+  enable: false
+
+custom_reward_function:
+  path: ${oc.env:REMOTE_REWARD_PATH}
+  name: compute_reward
+  reward_kwargs:
+    # V14: 4 项, 跟 V12 公式同构, 信号源重做
+    answer_weight: 3.0
+    step_value_weight: 1.5
+    path_alignment_weight: 0.5
+    distractor_leak_weight: 0.5
+
+algorithm:
+  adv_estimator: grpo
+  norm_adv_by_std_in_grpo: true
+  use_kl_in_reward: false
+
+trainer:
+  critic_warmup: 0
+  logger: ["console", "file"]
+  project_name: chaingsm_remote_grpo_verl
+  experiment_name: qwen2.5-0.5b-grpo-verl-v14-reasoning
+  default_local_dir: ${oc.env:REMOTE_OUTPUT_DIR}/grpo_verl_v14_vllm/checkpoints
+  n_gpus_per_node: ${oc.env:SLURM_GPUS}
+  nnodes: 1
+  total_epochs: ${oc.env:GRPO_EPOCHS}
+  save_freq: 300
+  test_freq: -1
+  val_before_train: false
