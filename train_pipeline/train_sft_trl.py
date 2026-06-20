@@ -26,15 +26,20 @@ def load_rows(path: str, max_samples: int | None = None) -> list[dict]:
         for line in f:
             if line.strip():
                 row = json.loads(line)
-                # TRL >= 0.26 treats datasets with a "prompt" column as prompt-completion
-                # datasets and expects the target column to be named "completion".
-                rows.append(
-                    {
-                        "id": row.get("id"),
-                        "prompt": row["prompt"],
-                        "completion": row.get("completion") or row.get("response", ""),
-                    }
-                )
+                # 2026-06-17: 优先 messages 路径 (TRL 1.5 SFTTrainer 原生 chat data),
+                # 老 prompt/completion 路径保留。
+                if "messages" in row and isinstance(row["messages"], list):
+                    rows.append({"id": row.get("id"), "messages": row["messages"]})
+                else:
+                    # TRL >= 0.26 treats datasets with a "prompt" column as prompt-completion
+                    # datasets and expects the target column to be named "completion".
+                    rows.append(
+                        {
+                            "id": row.get("id"),
+                            "prompt": row["prompt"],
+                            "completion": row.get("completion") or row.get("response", ""),
+                        }
+                    )
                 if max_samples and len(rows) >= max_samples:
                     break
     return rows

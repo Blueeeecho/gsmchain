@@ -1,5 +1,5 @@
 model:
-  model_name_or_path: /home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct
+  model_name_or_path: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft/Qwen2.5-0.5B-Instruct/sft_cot_2ep/20260617_172800/checkpoints/checkpoint-1524
   trust_remote_code: true
 data:
   train_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/sft/all_sft_cot.jsonl
@@ -10,7 +10,7 @@ training:
   max_length: 1024
   completion_only_loss: true
   packing: false
-  num_train_epochs: 2
+  num_train_epochs: 1
   max_steps: -1
   per_device_train_batch_size: 2
   gradient_accumulation_steps: 4

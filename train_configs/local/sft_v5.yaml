@@ -1,29 +1,31 @@
+# SFT v5 配置 - v4 + 1 epoch (4 epoch) 验证过拟合
 model:
   model_name_or_path: /home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct
   trust_remote_code: true
 data:
-  train_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/sft/all_sft_cot.jsonl
+  train_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/sft/all_sft_train_prompt_completion.jsonl
   max_samples: null
 output:
-  output_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft/Qwen2.5-0.5B-Instruct/default
+  output_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft/Qwen2.5-0.5B-Instruct/sft_v5
 training:
-  max_length: 1024
+  max_length: 3072
   completion_only_loss: true
   packing: false
-  num_train_epochs: 2
-  max_steps: -1
-  per_device_train_batch_size: 2
-  gradient_accumulation_steps: 4
-  learning_rate: 5.0e-6
+  num_train_epochs: 4
+  max_steps: 1528
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 16
+  learning_rate: 2.0e-5
   lr_scheduler_type: cosine
   warmup_ratio: 0.1
+  weight_decay: 0.0
   logging_strategy: steps
   logging_first_step: true
-  logging_steps: 10
+  logging_steps: 100
   disable_tqdm: false
   log_level: info
-  save_strategy: "epoch"
-  save_total_limit: 3
+  save_strategy: "no"
+  save_total_limit: 1
   bf16: true
   gradient_checkpointing: true
   report_to: []
@@ -38,15 +40,15 @@ eval:
   enabled: false
   baseline_before_train: false
   data_path: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/gsmchain/gsm8k_test_clean.jsonl
-  method: cot_brackets
+  method: train_json_prompt
   limit: null
-  batch_size: 64
+  batch_size: 32
   tensor_parallel_size: 1
-  gpu_memory_utilization: 0.8
-  gpu_memory_utilization_candidates: [0.8, 0.7, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25]
+  gpu_memory_utilization: 0.85
+  gpu_memory_utilization_candidates: [0.85, 0.7, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25]
   dtype: auto
   max_model_len: null
-  max_tokens: 1024
+  max_tokens: 512
   top_k: 1
   top_p: 1.0
   seed: 42

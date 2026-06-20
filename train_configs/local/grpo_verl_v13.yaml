@@ -1,0 +1,103 @@
+# verl GRPO v13 training config for ChainGSM on RTX 5090 (single GPU)
+#
+# v13 设计: 5 字段 JSON (target/steps/exclude_facts/final_expression/final_answer) + 3 rules
+# 改 V12 的 6 字段 + 12 rules, 砍 use_facts/answer, 保留 exclude_facts
+# Reward: hard per-step 数值匹配 (治 64% 算式错) + 仅信 final_expression (治 4.3% R11 违反)
+# 起点: Qwen2.5-0.5B-Instruct base (跳过 SFT, 直接 GRPO)
+# 数据: chaingsm_data/data/final/grpo/grpo_v13_json.parquet (3051 行, 5 类别)
+# 评测: cot_brackets_v13_json, gsm8k_test_clean.jsonl (5467 行)
+#
+# 训练量: 2 epoch × 762 steps/epoch = 1524 total steps
+# 保存: 每 300 步 (epoch 1: 5 ckpts @ 300/600/900/1200/1500)
+#                            (epoch 2: 5 ckpts @ 1800/2100/2400/2700/3000)
+# 评测: 训练完后逐个 ckpt 跑 cot_brackets_v13_json eval
+#
+# V13 max_prompt_length 1536: v13 prompt ~1328 tokens + question ~150 tokens 余量
+# 砍 5 字段 + 3 rules 后 prompt 比 V12 2256 短 41%, 余量大幅提升
+
+data:
+  train_files: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/grpo/grpo_v13_json.parquet
+  val_files: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/grpo/grpo_v13_json.parquet
+  train_batch_size: 4
+  val_batch_size: 4
+  max_prompt_length: 1536  # v13 prompt ~1328 tokens, 1536 留 200 余量
+  max_response_length: 1024
+  filter_overlong_prompts: true
+  truncation: error
+
+actor_rollout_ref:
+  hybrid_engine: true
+  model:
+    path: /home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct
+    use_remove_padding: false
+    enable_gradient_checkpointing: true
+  actor:
+    optim:
+      lr: 5.0e-7
+      weight_decay: 0.1
+      betas: [0.9, 0.99]
+      lr_scheduler_type: cosine
+      lr_warmup_steps_ratio: 0.1
+      clip_grad: 0.1
+    ppo_mini_batch_size: 4
+    ppo_micro_batch_size_per_gpu: 1
+    use_kl_loss: true
+    kl_loss_coef: 0.04
+    kl_loss_type: low_var_kl
+    clip_ratio: 0.2
+    entropy_coeff: 0
+    loss_agg_mode: token-mean
+    fsdp_config:
+      param_offload: false
+      optimizer_offload: false
+    checkpoint:
+      save_contents: ['model', 'optimizer', 'extra', 'hf_model']
+      load_contents: ['model', 'optimizer', 'extra']
+  rollout:
+    name: vllm
+    tensor_model_parallel_size: 1
+    gpu_memory_utilization: 0.4  # v12 OOM 调到 0.4, v13 沿用
+    n: 4
+    temperature: 0.9
+    top_p: 1.0
+    top_k: 50
+    enforce_eager: true
+    free_cache_engine: true
+    log_prob_micro_batch_size_per_gpu: 1
+    enable_sleep_mode: true
+  ref:
+    log_prob_micro_batch_size_per_gpu: 1
+    fsdp_config:
+      param_offload: true
+
+reward_model:
+  enable: false
+
+custom_reward_function:
+  path: /home/wwq416/snap/wwq/math-chain/train_pipeline/reward_chaingsm_v13_json_verl.py
+  name: compute_reward
+  reward_kwargs:
+    # v13: hard per-step 数值匹配 + 仅信 final_expression
+    answer_weight: 3.0           # r_final: eval(final_expression) == gold
+    step_value_weight: 1.5      # r_step_val: per-step hard numeric match
+    step_format_weight: 0.5     # r_step_fmt: all steps have 3 fields
+    format_weight: 0.5          # r_format: 5 fields all present
+    exclude_weight: 0.5         # r_exclude: decoy not leaked into steps
+
+algorithm:
+  adv_estimator: grpo
+  norm_adv_by_std_in_grpo: true
+  use_kl_in_reward: false
+
+trainer:
+  critic_warmup: 0
+  logger: ["console", "file"]
+  project_name: chaingsm_local_grpo_verl
+  experiment_name: qwen2.5-0.5b-grpo-verl-v13-json
+  default_local_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/grpo_verl/Qwen2.5-0.5B-Instruct
+  n_gpus_per_node: 1
+  nnodes: 1
+  total_epochs: 2
+  save_freq: 300
+  test_freq: -1
+  val_before_train: false

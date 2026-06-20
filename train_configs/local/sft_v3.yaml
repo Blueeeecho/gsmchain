@@ -1,0 +1,61 @@
+# SFT v3 配置 - 对齐 AbstRaL 论文 + 复用 v1 成功经验
+# 关键变化 (vs sft_v2):
+#   - completion_only_loss: false → true (回退 v1 成功设置, 避免 loss 被 prompt 稀释)
+#   - learning_rate: 5e-6 → 2e-5 (回退 v1 成功设置)
+#   - per_device_batch: 2 → 1, grad_accum: 4 → 8 (effective batch 8 对齐论文)
+#   - warmup_ratio: 0.03 → 0.1 (v1 经验值)
+model:
+  model_name_or_path: /home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct
+  trust_remote_code: true
+data:
+  train_file: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/sft/all_sft_train_prompt_completion.jsonl
+  max_samples: null
+output:
+  output_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft/Qwen2.5-0.5B-Instruct/sft_v3
+training:
+  max_length: 3072
+  completion_only_loss: true
+  packing: false
+  num_train_epochs: 1
+  max_steps: 382
+  per_device_train_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 2.0e-5
+  lr_scheduler_type: cosine
+  warmup_ratio: 0.1
+  weight_decay: 0.0
+  logging_strategy: steps
+  logging_first_step: true
+  logging_steps: 20
+  disable_tqdm: false
+  log_level: info
+  save_strategy: "no"
+  save_total_limit: 1
+  bf16: true
+  gradient_checkpointing: true
+  report_to: []
+  remove_unused_columns: false
+lora:
+  enabled: false
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules: all-linear
+eval:
+  enabled: false
+  baseline_before_train: false
+  data_path: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/gsmchain/gsm8k_test_clean.jsonl
+  method: train_json_prompt
+  limit: null
+  batch_size: 32
+  tensor_parallel_size: 1
+  gpu_memory_utilization: 0.85
+  gpu_memory_utilization_candidates: [0.85, 0.7, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25]
+  dtype: auto
+  max_model_len: null
+  max_tokens: 512
+  top_k: 1
+  top_p: 1.0
+  seed: 42
+  trust_remote_code: true
+  offload_model_before_vllm: true

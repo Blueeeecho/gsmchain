@@ -1,0 +1,116 @@
+# verl GRPO v10-signed training config for ChainGSM on RTX 5090 (single GPU)
+#
+# v10 设计: signed reward, [-0.5, 4.2] 区间, distractor penalty
+# 起点: SFT epoch3 (overall 26.87% / original 31.16%)
+# 数据: chaingsm_data/data/final/grpo/all_grpo_cot.parquet (6094 行, 5 类别)
+# 评测: cot_brackets, gsm8k_test_clean.jsonl (5467 行)
+# 
+# 训练量: 2 epoch × 1523 steps/epoch = 3046 total steps
+# 保存: 每 300 步 (epoch 1: 5 ckpts @ 300/600/900/1200/1500)
+#                            (epoch 2: 5 ckpts @ 1800/2100/2400/2700/3000)
+# 评测: 训练完后逐个 ckpt 跑 cot_brackets eval
+
+data:
+  train_files: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/grpo/all_grpo_cot.parquet
+  val_files: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/final/grpo/all_grpo_cot.parquet
+  train_batch_size: 4
+  val_batch_size: 4
+  max_prompt_length: 768
+  max_response_length: 1024
+  filter_overlong_prompts: true
+  truncation: error
+
+actor_rollout_ref:
+  hybrid_engine: true
+  model:
+    path: /home/wwq416/snap/wwq/math-chain/outputs/train/local/sft/Qwen2.5-0.5B-Instruct/sft_cot_2ep_resume/20260617_180315/checkpoints/checkpoint-762
+    use_remove_padding: false
+    enable_gradient_checkpointing: true
+  actor:
+    optim:
+      lr: 5.0e-7
+      weight_decay: 0.1
+      betas: [0.9, 0.99]
+      lr_scheduler_type: cosine
+      lr_warmup_steps_ratio: 0.1
+      clip_grad: 0.1
+    ppo_mini_batch_size: 4
+    ppo_micro_batch_size_per_gpu: 1
+    use_kl_loss: true
+    kl_loss_coef: 0.04
+    kl_loss_type: low_var_kl
+    clip_ratio: 0.2
+    entropy_coeff: 0
+    loss_agg_mode: token-mean
+    fsdp_config:
+      param_offload: false
+      optimizer_offload: false
+    checkpoint:
+      save_contents: ['model', 'optimizer', 'extra', 'hf_model']
+      load_contents: ['model', 'optimizer', 'extra']
+  rollout:
+    name: vllm
+    tensor_model_parallel_size: 1
+    gpu_memory_utilization: 0.5  # 防插入: 16.3GB rollout 预算
+    n: 4
+    temperature: 0.9
+    top_p: 1.0
+    top_k: 50
+    enforce_eager: true
+    free_cache_engine: true
+    log_prob_micro_batch_size_per_gpu: 1
+    enable_sleep_mode: true  # update_weights 时 vLLM 睡掉, 省 ~16GB
+  ref:
+    log_prob_micro_batch_size_per_gpu: 1
+    fsdp_config:
+      param_offload: true
+
+reward_model:
+  enable: false
+
+custom_reward_function:
+  path: /home/wwq416/snap/wwq/math-chain/train_pipeline/reward_chaingsm_v11_verl.py
+  name: compute_reward
+  reward_kwargs:
+    # v11: 删除 format/calc, 新增 step_value (vs gold)
+    answer_weight: 3.0
+    step_value_weight: 1.5
+    core_weight: 0.5
+    core_trace_w: 0.8
+    core_final_w: 0.2
+    distractor_weight: 0.5
+    invalid_reward: -0.5
+
+algorithm:
+  adv_estimator: grpo
+  norm_adv_by_std_in_grpo: true
+  use_kl_in_reward: false
+
+trainer:
+  critic_warmup: 0
+  logger: ["console", "file"]
+  project_name: chaingsm_local_grpo_verl
+  experiment_name: qwen2.5-0.5b-grpo-verl-v11
+  default_local_dir: /home/wwq416/snap/wwq/math-chain/outputs/train/local/grpo_verl/Qwen2.5-0.5B-Instruct
+  n_gpus_per_node: 1
+  nnodes: 1
+  total_epochs: 1
+  save_freq: 200
+  test_freq: -1
+  val_before_train: false
+  resume_mode: disable
+  max_actor_ckpt_to_keep: 10  # 保留所有 10 个 ckpt (防 only-2 限制)
+  max_critic_ckpt_to_keep: 10
+
+# Evaluation config (used by run_grpo_verl_v10.sh, NOT by verl itself)
+eval:
+  enabled: true
+  baseline_before_train: false  # 训练完后跑所有 ckpt eval
+  data_path: /home/wwq416/snap/wwq/math-chain/chaingsm_data/data/gsmchain/gsm8k_test_clean.jsonl
+  method: cot_brackets
+  gpu_memory_utilization: 0.5
+  batch_size: 64
+
+ray_kwargs:
+  ray_init:
+    num_cpus: 16

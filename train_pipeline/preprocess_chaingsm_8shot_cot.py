@@ -63,7 +63,14 @@ def to_verl_grpo_8shot_row(record: dict[str, Any], split: str, index: int) -> di
         "ability": "math",
         "reward_model": {
             "style": "rule",
-            "ground_truth": {"gold_answer": str(record.get("answer", ""))},
+            "ground_truth": {
+                "gold_answer": str(record.get("answer", "")),
+                "gold_expression": str(record.get("gold_expression", "")),
+                "core_chain": record.get("core_chain") or [],
+                "distractor_chain": record.get("distractor_chain") or [],
+                "question": (record.get("question_distracted") or record.get("question_original") or "").strip(),
+                "category": str(record.get("category", "")),
+            },
         },
         "extra_info": {
             "split": split,

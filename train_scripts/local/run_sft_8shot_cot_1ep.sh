@@ -26,8 +26,8 @@ DATA="${DATA:-${ROOT}/chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balan
 
 # 14528 / 16 = 908 effective steps
 MAX_STEPS="${MAX_STEPS:-908}"
-BATCH_SIZE="${BATCH_SIZE:-4}"
-GRAD_ACCUM="${GRAD_ACCUM:-4}"
+BATCH_SIZE="${BATCH_SIZE:-2}"
+GRAD_ACCUM="${GRAD_ACCUM:-8}"
 LR="${LR:-2e-5}"
 MAX_LENGTH="${MAX_LENGTH:-1024}"
 

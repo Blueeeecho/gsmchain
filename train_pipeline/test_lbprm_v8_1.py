@@ -281,4 +281,61 @@ else:
 
 print()
 print(f"=== {passed}/{total} PASSED ===")
+
+# === v8.2: 接通完整 reference (gold_expression + core_chain + question + category) ===
+
+# === F: path_competition + core chain + 答对 -> 满分 1.0 ===
+total += 1
+ref_F = {
+    "gold_answer": "18",
+    "gold_expression": "(16-3-4)*2",
+    "core_chain": [["eggs_per_day", "sold_eggs", "-3-4"], ["sold_eggs", "daily_income", "*2"]],
+    "distractor_chain": [["eggs_per_day", "total_eggs_value", "*2"]],
+    "question": "Janet's ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. She could sell all 16 eggs for $32, but instead she sells the remainder at the farmers' market daily for $2 per fresh duck egg. How much in dollars does she make?",
+    "category": "path_competition",
+}
+if test("v82-F-path-competition-core-correct",
+         "16 - 3 - 4 = 9 eggs. 9 * 2 = 18 dollars. The final answer is 18 dollars.",
+         ref_F, 1.0, tol=0.05):
+    passed += 1
+
+# === G: independent_decoy + distractor 算式 -> 扣分 ===
+total += 1
+ref_G = {
+    "gold_answer": "18",
+    "gold_expression": "(16-3-4)*2",
+    "core_chain": [["16_eggs_per_day", "eggs_after_breakfast", "-3"], ["eggs_after_breakfast", "eggs_for_sale", "-4"], ["eggs_for_sale", "daily_income", "*2"]],
+    "distractor_chain": [["batches_per_day", "cookies_per_day", "*12"], ["cookies_per_day", "cookie_income", "*1.5"]],
+    "question": "Janet's ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. She sells the remainder at the farmers' market daily for $2 per fresh duck egg. How much in dollars does she make?",
+    "category": "independent_decoy",
+}
+if test("v82-G-independent-decoy-distractor-wrong",
+         "2 * 12 = 24 cookies. 24 * 1.5 = 36 dollars. The final answer is 36 dollars.",
+         ref_G, 0.30, tol=0.10):
+    passed += 1
+
+# === H-good: target_scope_misalignment + core chain + 答对 ===
+total += 1
+ref_H = {
+    "gold_answer": "70000",
+    "gold_expression": "80000*2.5-(80000+50000)",
+    "core_chain": [["purchase_price", "total_cost", "+repair_cost"], ["purchase_price", "value_increase", "*1.5"], ["purchase_price", "new_value", "+value_increase"], ["new_value", "profit", "-total_cost"]],
+    "distractor_chain": [["profit", "donation", "*0.1"]],
+    "question": "Josh decides to try flipping a house. He buys a house for $80,000 and then puts in $50,000 in repairs. This increased the value of the house by 150%. After selling the house, he donates 10% of his profit to charity. How much profit did he make?",
+    "category": "target_scope_misalignment",
+}
+if test("v82-H-good-target-scope-core-correct",
+         "80000 * 2.5 = 200000. 200000 - 80000 - 50000 = 70000. The final answer is 70000.",
+         ref_H, 0.85, tol=0.10):
+    passed += 1
+
+# === H-bad: target_scope_misalignment + after-donation 答错 ===
+total += 1
+if test("v82-H-bad-target-scope-after-donation-wrong",
+         "70000 * 0.9 = 63000. The final answer is 63000.",
+         ref_H, 0.30, tol=0.10):
+    passed += 1
+
+print()
+print(f"=== {passed}/{total} PASSED ===")
 sys.exit(0 if passed == total else 1)

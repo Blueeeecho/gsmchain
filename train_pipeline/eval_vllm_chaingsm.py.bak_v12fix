@@ -251,274 +251,6 @@ COT_BRACKETS_V12_JSON_USER_TEMPLATE = (
 )
 
 
-
-# 2026-06-19: v13_long_prompt v1 (5 字段, 3 rules)
-# 砍 V12 的 use_facts / answer 字段, 保留 exclude_facts (给 decoy 显式位置)
-# 砍 V12 的 12 rules 到 3 条 (R1 有用量 / R2 percent / R3 path switch)
-# Prompt: V12 2256 tokens → V13 1328 tokens (-41%)
-COT_BRACKETS_V13_JSON_SYSTEM_PROMPT = (
-    "You are a careful grade-school math reasoning assistant.\\n"
-    "Your task is to solve the problem correctly and return only one valid JSON object.\\n"
-    "Reasoning style is not judged; correctness, target selection, step validity, and exclusion of irrelevant facts are judged.\\n"
-    "Output rules:\\n"
-    "Output valid JSON only.\\n"
-    "Do not use markdown.\\n"
-    "Do not write any text before or after the JSON.\\n"
-    "Do not include comments.\\n"
-    "Do not include trailing commas.\\n"
-    "All arithmetic derivations used for the final answer must appear in the \\\"steps\\\" array.\\n"
-    "Each step must contain exactly three fields:\\n"
-    "\\\"explanation\\\": a short natural-language explanation of the quantity being computed.\\n"
-    "\\\"expression\\\": the arithmetic expression.\\n"
-    "\\\"value\\\": the evaluated result.\\n"
-    "The final answer must be represented by \\\"final_expression\\\" and \\\"final_answer\\\".\\n"
-    "Do not include irrelevant, hypothetical, optional, alternative-path, or separate-scope calculations in \\\"steps\\\".\\n"
-    "Decoy facts (not needed to answer the target) must be listed in \\\"exclude_facts\\\" with a brief reason.\\n"
-    "Required JSON schema:\\n"
-    "{\\n"
-    "\\\"target\\\": \\\"\\\",\\n"
-    "\\\"steps\\\": [\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"\\\",\\n"
-    "\\\"expression\\\": \\\"\\\",\\n"
-    "\\\"value\\\": \\\"\\\"\\n"
-    "}\\n"
-    "],\\n"
-    "\\\"exclude_facts\\\": [\\n"
-    "\\\"\\\"\\n"
-    "],\\n"
-    "\\\"final_expression\\\": \\\"\\\",\\n"
-    "\\\"final_answer\\\": 0\\n"
-    "}\\n"
-    "Rules:\\n"
-    "R1. Every step must introduce or combine a useful quantity. Do not add number-padding steps.\\n"
-    "R2. \\\"increased by X%\\\" means multiply by 1 + X/100. Identify whether a percentage means \\\"X% of Y\\\", \\\"increased by X%\\\", or \\\"decreased by X%\\\" before computing.\\n"
-    "R3. \\\"but instead\\\", \\\"instead\\\", \\\"however\\\", and \\\"after that\\\" usually indicate a path switch. Earlier alternative scenarios are excluded unless the question asks about them.\\n"
-)
-
-# 2026-06-19: v14_long_prompt v1 (4 字段, 12 rules, prose 表达式 reasoning)
-# 砍 V13 的 steps 数组, 改 prose/表达式 行交错放在 reasoning 数组
-# 末行 = 最终数值
-COT_BRACKETS_V14_REASONING_SYSTEM_PROMPT = (
-    "You are a careful grade-school math reasoning assistant.\n"
-    "Your task is to solve the problem correctly and return only one valid JSON object.\n"
-    "Correctness, target selection, step alignment, and exclusion of irrelevant facts are judged. Reasoning style is not judged.\n\n"
-    "Output rules:\n"
-    "Output valid JSON only.\n"
-    "Do not use markdown.\n"
-    "Do not write any text before or after the JSON.\n"
-    "Do not include comments.\n"
-    "Do not include trailing commas.\n"
-    "The \"reasoning\" array is the only place where you record your derivation. Every calculation used for the final answer must appear as a math-expression line in \"reasoning\".\n"
-    "Reasoning must physically interleave natural-language COT lines and math-expression lines.\n"
-    "The very last element of \"reasoning\" must be the final numeric answer.\n"
-    "Decoy facts (not needed to answer the target) must be listed in \"exclude_facts\" with a brief reason. Do not use them in \"reasoning\".\n\n"
-    "Required JSON schema:\n"
-    "{\n"
-    "\"target\": \"\",\n"
-    "\"use_facts\": [\n"
-    "\"\"\n"
-    "],\n"
-    "\"exclude_facts\": [\n"
-    "\"\"\n"
-    "],\n"
-    "\"reasoning\": [\n"
-    "\"<natural-language COT line>\",\n"
-    "\"<math expression line>\",\n"
-    "\"...\",\n"
-    "\"<final numeric value line>\"\n"
-    "]\n"
-    "}\n\n"
-    "Rules:\n"
-    "R1. Every reasoning line must introduce or combine a useful quantity. Do not add number-padding lines.\n"
-    "R2. \"increased by X%\" means multiply by 1 + X/100. Identify whether a percentage means \"X% of Y\", \"increased by X%\", \"decreased by X%\", or \"X% of the remaining\" before computing.\n"
-    "R3. \"but instead\", \"instead\", \"however\", and \"after that\" usually indicate a path switch. Earlier alternative scenarios are excluded unless the question asks about them.\n"
-    "R4. If a fact is excluded in \"exclude_facts\", it must not appear as a math-expression in \"reasoning\".\n"
-    "R5. The target must match the question exactly (quantity and unit).\n"
-    "R6. A decoy is a fact not needed to answer the target. Put it in \"exclude_facts\"; do not compute it in \"reasoning\".\n"
-    "R7. In multiplication or division steps, units must match the quantity being computed.\n"
-    "R8. \"How many X\" must not mix units such as counts, weights, prices, or rates in the same summed expression.\n"
-    "R9. Do not write self-cancelling expressions such as \"A / X * X\" or \"A + B - B\" unless explicitly required.\n"
-    "R10. Reasoning must end with a numeric value; that value is the final answer.\n"
-    "R11. Math-expression lines contain numbers, operators, parentheses, and the equals sign. They do not contain prose.\n"
-    "R12. At least one natural-language COT line must appear in \"reasoning\" (do not skip prose entirely).\n"
-)
-
-
-COT_BRACKETS_V14_REASONING_USER_TEMPLATE = (
-    "Solve the following grade-school math problem.\n\n"
-    "Return only one valid JSON object following this schema:\n\n"
-    "{\n"
-    "\"target\": \"<quantity and unit>\",\n"
-    "\"use_facts\": [\n"
-    "\"<fact used>\"\n"
-    "],\n"
-    "\"exclude_facts\": [\n"
-    "\"<fact excluded + reason>\"\n"
-    "],\n"
-    "\"reasoning\": [\n"
-    "\"<prose line>\",\n"
-    "\"<math expression line>\",\n"
-    "\"...\",\n"
-    "\"<final numeric value>\"\n"
-    "]\n"
-    "}\n\n"
-    "Important:\n"
-    "* Output JSON only.\n"
-    "* Do not use markdown.\n"
-    "* Do not write explanations outside the JSON.\n"
-    "* Every calculation used for the final answer must appear as a math-expression line in \"reasoning\".\n"
-    "* Decoy / alternative-path / separate-scope facts must appear in \"exclude_facts\", never in \"reasoning\".\n"
-    "* The last element of \"reasoning\" is the final answer (a number).\n\n"
-    "Examples:\n\n"
-    "Example 1 (attribute_mismatch, decoy exclusion):\n"
-    "Problem: A robe takes 2 bolts of blue fiber and half that much white fiber. Each bolt of blue fiber weighs 3 pounds and each bolt of white fiber weighs 2 pounds. How many bolts in total does it take?\n\n"
-    "JSON:\n"
-    "{\n"
-    "\"target\": \"total number of bolts\",\n"
-    "\"use_facts\": [\n"
-    "\"The robe takes 2 bolts of blue fiber.\",\n"
-    "\"The robe takes half as many white bolts as blue.\"\n"
-    "],\n"
-    "\"exclude_facts\": [\n"
-    "\"Each blue bolt weighs 3 pounds; the question asks for bolts, not weight.\",\n"
-    "\"Each white bolt weighs 2 pounds; the question asks for bolts, not weight.\"\n"
-    "],\n"
-    "\"reasoning\": [\n"
-    "\"We need the total number of bolts, not their weight, so bolt weight facts are decoys.\",\n"
-    "\"blue_bolts = 2\",\n"
-    "\"The white bolts count is half the blue bolts count.\",\n"
-    "\"white_bolts = blue_bolts / 2 = 2 / 2 = 1\",\n"
-    "\"Now add the two counts to get the total.\",\n"
-    "\"total_bolts = blue_bolts + white_bolts = 2 + 1\",\n"
-    "\"total_bolts = 3\"\n"
-    "]\n"
-    "}\n\n"
-    "Example 2 (path_competition, but-instead switch):\n"
-    "Problem: Janet's ducks lay 16 eggs per day. She eats three for breakfast every morning and bakes muffins for her friends every day with four. She could sell all 16 eggs for $32, but instead she sells the remainder at the farmers' market daily for $2 per fresh duck egg. How much in dollars does she make every day at the farmers' market?\n\n"
-    "JSON:\n"
-    "{\n"
-    "\"target\": \"dollars made at the farmers' market per day\",\n"
-    "\"use_facts\": [\n"
-    "\"Janet's ducks lay 16 eggs per day.\",\n"
-    "\"She eats 3 eggs for breakfast.\",\n"
-    "\"She uses 4 eggs for muffins.\",\n"
-    "\"She sells the remaining eggs at $2 each.\"\n"
-    "],\n"
-    "\"exclude_facts\": [\n"
-    "\"She could sell all 16 eggs for $32; this is an alternative scenario replaced by 'but instead'.\"\n"
-    "],\n"
-    "\"reasoning\": [\n"
-    "\"'but instead' switches the path; the $32 alternative is excluded.\",\n"
-    "\"remaining_eggs = 16 - 3 - 4\",\n"
-    "\"remaining_eggs = 9\",\n"
-    "\"Multiply remaining eggs by $2 each.\",\n"
-    "\"dollars_per_day = remaining_eggs * 2 = 9 * 2\",\n"
-    "\"dollars_per_day = 18\"\n"
-    "]\n"
-    "}\n\n"
-    "Now solve the following problem.\n\n"
-    "Problem:\n{question}\n"
-)
-
-
-COT_BRACKETS_V13_JSON_USER_TEMPLATE = (
-    "Solve the following grade-school math problem.\\n\\n"
-    "Return only one valid JSON object following this schema:\\n\\n"
-    "{\\n"
-    "\\\"target\\\": \\\"<quantity and unit being asked>\\\",\\n"
-    "\\\"steps\\\": [\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"<what this step computes>\\\",\\n"
-    "\\\"expression\\\": \\\"<arithmetic>\\\",\\n"
-    "\\\"value\\\": \\\"<result>\\\"\\n"
-    "}\\n"
-    "],\\n"
-    "\\\"exclude_facts\\\": [\\n"
-    "\\\"<fact excluded and brief reason>\\\"\\n"
-    "],\\n"
-    "\\\"final_expression\\\": \\\"<single expression for the final answer>\\\",\\n"
-    "\\\"final_answer\\\": <number>\\n"
-    "}\\n\\n"
-    "Important:\\n\\n"
-    "* Output JSON only.\\n"
-    "* Do not use markdown.\\n"
-    "* Do not write explanations outside the JSON.\\n"
-    "* Every calculation used for the final answer must appear in \\\"steps\\\".\\n"
-    "* Decoy facts (not needed to answer the target) must appear only in \\\"exclude_facts\\\", not in \\\"steps\\\".\\n"
-    "* \\\"final_expression\\\" must compute the final answer directly.\\n"
-    "* \\\"final_answer\\\" must be the numeric value of \\\"final_expression\\\".\\n\\n"
-    "Examples:\\n\\n"
-    "Example 1 (simple arithmetic):\\n"
-    "Problem: Janet's ducks lay 16 eggs per day. She eats 3 for breakfast and uses 4 for muffins. She sells the rest at $2 each. How much does she make per day at the farmers\' market?\\n\\n"
-    "JSON:\\n"
-    "{\\n"
-    "\\\"target\\\": \\\"dollars per day at the farmers\\' market\\\",\\n"
-    "\\\"steps\\\": [\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"Compute remaining eggs after breakfast and muffins.\\\",\\n"
-    "\\\"expression\\\": \\\"16 - 3 - 4\\\",\\n"
-    "\\\"value\\\": 9\\n"
-    "},\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"Compute dollars from selling the remaining eggs at $2 each.\\\",\\n"
-    "\\\"expression\\\": \\\"9 * 2\\\",\\n"
-    "\\\"value\\\": 18\\n"
-    "}\\n"
-    "],\\n"
-    "\\\"exclude_facts\\\": [],\\n"
-    "\\\"final_expression\\\": \\\"(16 - 3 - 4) * 2\\\",\\n"
-    "\\\"final_answer\\\": 18\\n"
-    "}\\n\\n"
-    "Example 2 (percent):\\n"
-    "Problem: Josh buys a house for $80,000 and spends $50,000 on repairs. The house value increases by 150%. What is the profit?\\n\\n"
-    "JSON:\\n"
-    "{\\n"
-    "\\\"target\\\": \\\"profit in dollars\\\",\\n"
-    "\\\"steps\\\": [\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"Compute new value after 150% increase.\\\",\\n"
-    "\\\"expression\\\": \\\"80000 * (1 + 150/100)\\\",\\n"
-    "\\\"value\\\": 200000\\n"
-    "},\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"Subtract purchase and repair costs.\\\",\\n"
-    "\\\"expression\\\": \\\"200000 - 80000 - 50000\\\",\\n"
-    "\\\"value\\\": 70000\\n"
-    "}\\n"
-    "],\\n"
-    "\\\"exclude_facts\\\": [],\\n"
-    "\\\"final_expression\\\": \\\"80000 * (1 + 150/100) - 80000 - 50000\\\",\\n"
-    "\\\"final_answer\\\": 70000\\n"
-    "}\\n\\n"
-    "Example 3 (path switch + decoy exclusion):\\n"
-    "Problem: A robe takes 2 bolts of blue fiber and half that much white fiber. Each bolt of blue fiber weighs 3 pounds and each bolt of white fiber weighs 2 pounds. How many bolts in total does it take?\\n\\n"
-    "JSON:\\n"
-    "{\\n"
-    "\\\"target\\\": \\\"total number of bolts\\\",\\n"
-    "\\\"steps\\\": [\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"Compute the number of white bolts as half the number of blue bolts.\\\",\\n"
-    "\\\"expression\\\": \\\"2 / 2\\\",\\n"
-    "\\\"value\\\": 1\\n"
-    "},\\n"
-    "{\\n"
-    "\\\"explanation\\\": \\\"Add the blue bolts and white bolts.\\\",\\n"
-    "\\\"expression\\\": \\\"2 + 1\\\",\\n"
-    "\\\"value\\\": 3\\n"
-    "}\\n"
-    "],\\n"
-    "\\\"exclude_facts\\\": [\\n"
-    "\\\"Each blue bolt weighs 3 pounds; the question asks for bolts, not weight.\\\",\\n"
-    "\\\"Each white bolt weighs 2 pounds; the question asks for bolts, not weight.\\\"\\n"
-    "],\\n"
-    "\\\"final_expression\\\": \\\"2 + 2 / 2\\\",\\n"
-    "\\\"final_answer\\\": 3\\n"
-    "}\\n\\n"
-    "Problem:\\n{question}\\n"
-)
-
-
 def load_examples(data_path: str | Path, limit: int | None = None) -> list[EvalExample]:
     examples = []
     with Path(data_path).open("r", encoding="utf-8") as f:
@@ -574,18 +306,6 @@ def build_messages(method: str, question: str) -> list[dict[str, str]]:
             {"role": "system", "content": COT_BRACKETS_V12_JSON_SYSTEM_PROMPT},
             {"role": "user", "content": COT_BRACKETS_V12_JSON_USER_TEMPLATE.replace("{question}", question.strip())},
         ]
-    if method == "cot_brackets_v13_json":
-        # 2026-06-19: v13_long_prompt v1, 5 字段 JSON
-        return [
-            {"role": "system", "content": COT_BRACKETS_V13_JSON_SYSTEM_PROMPT},
-            {"role": "user", "content": COT_BRACKETS_V13_JSON_USER_TEMPLATE.replace("{question}", question.strip())},
-        ]
-    if method == "cot_brackets_v14_reasoning":
-        # 2026-06-19: v14_long_prompt v1, 4 字段 + prose 表达式 reasoning
-        return [
-            {"role": "system", "content": COT_BRACKETS_V14_REASONING_SYSTEM_PROMPT},
-            {"role": "user", "content": COT_BRACKETS_V14_REASONING_USER_TEMPLATE.replace("{question}", question.strip())},
-        ]
     raise ValueError(f"Unsupported train-time eval method: {method}")
 
 
@@ -603,159 +323,26 @@ def build_prompt(tokenizer: Any, method: str, question: str) -> str:
 
 
 def extract_answer_with_json_v12(output: str) -> str | None:
-    """2026-06-19: v12_long_prompt v4 JSON 抽取 (修复 brace counting 版)。
-
-    关键修复: 用 brace counting 找最外层 { ... }, 替代非贪婪 {.*?}
-    (非贪婪在 steps 数组里会抓到 step 内的 {explanation, expression, value} 子结构)
-
-    优先级:
-      1) brace counting 找最外层 JSON
-         - dict["answer"] 优先
-         - dict["final_expression"] 兜底
-      2) <<FINAL: expr = N>> 老协议
-      3) ANSWER: N 老协议
-      4) 全文 brace counting 抓 answer
-      5) gsm_answer_extractor.extract_answer 兜底 (抓 last number 等)
+    """2026-06-19: v12_long_prompt v4 JSON 抽取。
+    解析 model 吐出的 JSON 对象, 优先用 answer 字段;失败则尝试 final_expression 字段;再失败回退到 <<FINAL:>> / ANSWER:。
     """
     text = str(output or "").strip()
-    if not text:
-        return extract_answer(output)
-    # 1) brace counting 找最外层 {...}
-    s = text.find("{")
-    if s >= 0:
-        depth, in_str, esc = 0, False, False
-        for i in range(s, len(text)):
-            c = text[i]
-            if esc:
-                esc = False
-                continue
-            if c == "\\":
-                esc = True
-                continue
-            if c == '"':
-                in_str = not in_str
-                continue
-            if in_str:
-                continue
-            if c == "{":
-                depth += 1
-            elif c == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        parsed = json.loads(text[s:i + 1])
-                        if isinstance(parsed, dict):
-                            if parsed.get("answer") is not None:
-                                return extract_text_answer(str(parsed["answer"]))
-                            if parsed.get("final_expression"):
-                                return extract_text_answer(str(parsed["final_expression"]))
-                    except (json.JSONDecodeError, ValueError):
-                        pass
-                    break
-    # 2) 回退到老协议 (<<FINAL:>> / ANSWER: / 全文 / last number)
+    # 1) 找首个完整的 { ... } (DOTALL 跨行)
+    json_match = re.search(r"\{.*?\}", text, re.DOTALL)
+    if json_match:
+        try:
+            parsed = json.loads(json_match.group(0))
+            if isinstance(parsed, dict):
+                # 优先 answer 字段
+                if parsed.get("answer") is not None:
+                    return extract_text_answer(str(parsed["answer"]))
+                # fallback: final_expression
+                if parsed.get("final_expression"):
+                    return extract_text_answer(str(parsed["final_expression"]))
+        except json.JSONDecodeError:
+            pass
+    # 2) 回退到 <<FINAL:>> / ANSWER: / 全文 JSON
     return extract_answer(output)
-
-
-def extract_answer_with_json_v14(output: str) -> str | None:
-    """2026-06-19: v14_long_prompt v1 JSON 抽取 (4 字段, reasoning 末行, brace counting)。
-
-    关键差异 vs v13:
-    - 4 字段 (target / use_facts / exclude_facts / reasoning)
-    - 无 final_expression / final_answer 字段, 末行 = 最终数值
-    - reasoning 末行直接拿数字
-    """
-    import re as _re
-    text = str(output or "").strip()
-    if not text:
-        return extract_answer(output)
-    s = text.find("{")
-    if s >= 0:
-        depth, in_str, esc = 0, False, False
-        for i in range(s, len(text)):
-            c = text[i]
-            if esc:
-                esc = False
-                continue
-            if c == "\\":
-                esc = True
-                continue
-            if c == '"':
-                in_str = not in_str
-                continue
-            if in_str:
-                continue
-            if c == "{":
-                depth += 1
-            elif c == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        obj = json.loads(text[s:i + 1])
-                    except json.JSONDecodeError:
-                        return extract_answer(output)
-                    # 1) reasoning 末行
-                    reasoning = obj.get("reasoning")
-                    if isinstance(reasoning, list) and reasoning:
-                        last = reasoning[-1]
-                        if isinstance(last, (int, float)):
-                            return str(last)
-                        if isinstance(last, str):
-                            m = _re.search(r"[=]\\s*([-+]?\\d+(?:\\.\\d+)?)\\s*$", last.strip())
-                            if m:
-                                return m.group(1)
-                            try:
-                                return str(float(last.strip()))
-                            except (ValueError, TypeError):
-                                pass
-                    return extract_answer(output)
-    return extract_answer(output)
-
-
-def extract_answer_with_json_v13(output: str) -> str | None:
-    """2026-06-19: v13_long_prompt v1 JSON 抽取 (5 字段, brace counting)。
-
-    关键差异 vs v12:
-    - 5 字段 (target / steps / exclude_facts / final_expression / final_answer)
-    - 优先 final_answer 字段 (V13 取代 V12 的 answer 字段)
-    - fallback final_expression
-    - 仍走 brace counting, 不再信 <<FINAL:>> 老协议
-    """
-    text = str(output or "").strip()
-    if not text:
-        return extract_answer(output)
-    s = text.find("{")
-    if s >= 0:
-        depth, in_str, esc = 0, False, False
-        for i in range(s, len(text)):
-            c = text[i]
-            if esc:
-                esc = False
-                continue
-            if c == "\\":
-                esc = True
-                continue
-            if c == '"':
-                in_str = not in_str
-                continue
-            if in_str:
-                continue
-            if c == "{":
-                depth += 1
-            elif c == "}":
-                depth -= 1
-                if depth == 0:
-                    try:
-                        parsed = json.loads(text[s:i + 1])
-                        if isinstance(parsed, dict):
-                            if parsed.get("final_answer") is not None:
-                                return extract_text_answer(str(parsed["final_answer"]))
-                            if parsed.get("final_expression"):
-                                return extract_text_answer(str(parsed["final_expression"]))
-                    except (json.JSONDecodeError, ValueError):
-                        pass
-                    break
-    return extract_answer(output)
-
 
 
 def extract_answer(output: str) -> str | None:
@@ -952,12 +539,7 @@ def evaluate_with_vllm(
                     outputs = llm.generate(prompt_batch, sampling_params, use_tqdm=False)
                     for example, output in zip(example_batch, outputs):
                         raw_output = output.outputs[0].text if output.outputs else ""
-                        if method == "cot_brackets_v13_json":
-                            pred_answer = extract_answer_with_json_v13(raw_output)
-                        elif method == "cot_brackets_v14_reasoning":
-                            pred_answer = extract_answer_with_json_v14(raw_output)
-                        else:
-                            pred_answer = extract_answer_with_json_v12(raw_output)
+                        pred_answer = extract_answer_with_json_v12(raw_output)
                         correct = is_correct(pred_answer, example.gold_answer)
                         row = {
                             "id": example.id,
@@ -1019,7 +601,7 @@ def main() -> None:
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--data-path", default=DEFAULT_TEST_DATA)
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--method", default="train_json_prompt", choices=["train_json_prompt", "direct", "zero_shot_cot", "cot_brackets", "cot_brackets_v12_json", "cot_brackets_v13_json", "cot_brackets_v14_reasoning"])
+    parser.add_argument("--method", default="train_json_prompt", choices=["train_json_prompt", "direct", "zero_shot_cot", "cot_brackets", "cot_brackets_v12_json"])
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
