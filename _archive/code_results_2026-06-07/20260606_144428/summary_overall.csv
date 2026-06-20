@@ -1,6 +1,0 @@
-model_name,model_path,prompt_profile,correct,total,accuracy,accuracy_percent
-Qwen2.5-0.5B-Instruct,/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-0.5B-Instruct,qwen_single_turn_8shot_chat,1439,6575,0.21885931558935362,21.88593155893536
-Qwen2.5-1.5B-Instruct,/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-1.5B-Instruct,qwen_single_turn_8shot_chat,1925,6575,0.29277566539923955,29.277566539923953
-Qwen2.5-Math-1.5B-Instruct,/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-Math-1.5B-Instruct,qwen_single_turn_8shot_chat,476,6575,0.07239543726235742,7.239543726235741
-Qwen2.5-3B-Instruct,/home/wwq416/snap/wwq/model/Qwen/Qwen2.5-3B-Instruct,qwen_single_turn_8shot_chat,3402,6575,0.5174144486692015,51.741444866920155
-Llama-3.2-1B-Instruct,/home/wwq416/snap/wwq/model/llama/Llama-3.2-1B-Instruct,llama_lm_eval_multiturn_8shot_single_bos,1567,6575,0.23832699619771863,23.832699619771862
