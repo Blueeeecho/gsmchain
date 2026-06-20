@@ -51,4 +51,6 @@ chaingsm_data/data/final/gsm8k_test_full/
 # Training data selection (14946 subset, regenerable from raw)
 chaingsm_data/data/raw/selected_gsm8k_train_balanced_one_variant_all.jsonl
 chaingsm_data/reports/train_balanced_one_variant/
-.idea/vcs.xml
+.idea/
+all_logs/
+
