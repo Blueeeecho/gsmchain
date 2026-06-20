@@ -34,6 +34,28 @@ ChainGSM Math-Chain 是一个面向小学数学推理鲁棒性的训练与评测
 docs/superpowers/plans/2026-06-02-local-only-maintenance.md
 ```
 
+
+## 最近一次训练结果 (v8.2 收尾, 2026-06-14)
+
+主线 `original >= 0.46` 目标在 v3 → v7 → v8.2 三次迭代中均未达成：
+
+- **baseline** (0.5B base + 8-shot CoT 原生): original 0.4329 (571/1319)
+- **v7 best** (step_100, 3 子项 reward): original 0.4428 (+0.99pp) — 失败，numeric 抢梯度
+- **v8.2 best** (step_200, 5 机制 reward + 修数据 schema): original 0.4003 (-3.26pp) — 失败
+- **v8.2 best by overall** (step_800): overall 0.3170 (+7.32pp) — 4 类变体齐涨 +10-14pp
+- **核心 trade-off 发现**: 0.5B 容量下抗干扰能力跟无干扰推理能力是零和博弈
+
+完整结果：`docs/superpowers/reports/2026-06-14-lbprm-v8-2-report.md`
+评测摘要：`outputs/train/local/grpo_verl_lbprm_v8/Qwen2.5-0.5B-Instruct/grpo_verl_v82_base/20260614_170033/eval/latest_metrics.json`
+
+下一次迭代 v9 候选方向（详见 v8.2 报告 §7）：
+
+- 候选 A: 修 target_recognition number-only bug + 加 8-shot 模板相似度子项
+- 候选 B: SFT + 8-shot 协议对齐 reward
+- 候选 C: 承认 0.5B 上限，转 1.5B
+- 候选 D: 集成 v7 + v8.2 step_200 + SFT ckpt
+
+
 ## 目录
 
 - [当前状态总览](#当前状态总览)

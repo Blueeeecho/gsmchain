@@ -64,6 +64,29 @@ Rules:
 21. Do not add facts that change the original computation conditions, such as changed rates, extra required materials, discounts, boosts, or new required quantities.
 22. The generated question's final sentence should ask the original target quantity.
 
+HARD RULES (CRITICAL, MUST FOLLOW OR THE VARIANT WILL BE REJECTED):
+23. NO SECOND QUESTION. The variant must contain EXACTLY ONE question (the original target).
+    Do NOT use transition words followed by a new question. Specifically forbidden starters
+    for any new sentence that would constitute a second question:
+        "Also,", "Additionally,", "What if", "How about", "And", "Furthermore,"
+    The LAST sentence of the variant must be the original target question. Nothing after it.
+24. DO NOT CHANGE THE TARGET QUANTITY. The variant must ask for the SAME final quantity
+    as the original. If the original asks "How much did she earn?", the variant must
+    also end with "How much did she earn?" (or a semantically identical restatement).
+    Do NOT add qualifiers like "in total" / "in all" / "altogether" that would change scope.
+25. DO NOT ADD TEMPORAL/SCOPE EXTENSIONS. Do NOT add sentences like:
+        "He also does X next week"
+        "She will do X again tomorrow"
+        "If she had instead ..."
+        "By the end of the year, ..."
+    These all shift the time window / scope and change the answer.
+26. DO NOT REPLACE ENTITIES. Do NOT change the entities/people/objects in the original
+    problem (e.g. don't change "Weng" to "John", don't change "$12" to "$20").
+    Branch ONLY with NEW entities/numbers that are clearly irrelevant to the target.
+27. The distractor_chain must be ENTIRELY IGNORED by gold_expression. gold_expression
+    must compute exactly {final_answer} using only the ORIGINAL problem's entities and numbers.
+    No entity/number from the distractor may appear in gold_expression.
+
 Return exactly this JSON schema:
 
 {{
@@ -98,7 +121,8 @@ def build_validation_prompt(original_question, generated_record):
     system = (
         "You are a strict validator for generated math word problems. Check whether "
         "the generated problem preserves the original answer and whether the added "
-        "distractor matches the requested category."
+        "distractor matches the requested category. Be especially strict about "
+        "the variant not introducing a second question or changing the target quantity."
     )
 
     generated_record_json = json.dumps(generated_record, ensure_ascii=False, indent=2)
@@ -116,17 +140,30 @@ Please check:
 5. Is there any contradiction or ambiguity?
 6. Are core_chain and distractor_chain reasonable list-of-triples annotations?
 
+CRITICAL checks (the variant WILL BE REJECTED if any of these is true):
+- multi_question: does the variant contain MORE THAN ONE question? (e.g. a sentence
+    starting with "Also," / "Additionally," that asks a new question)
+- preserves_target: does the variant ask the SAME final quantity as the original?
+    (e.g. original asks "earnings" but variant now asks "savings" or "profit after tax")
+- broken: is the variant self-contradictory, ambiguous, or have insufficient information?
+- answer_correct: does the dataset answer match the correct solution of the variant
+    (treating the variant as a fresh question to be solved)?
+
 Return JSON only:
 
 {{
-  "pass": true,
-  "answer_unchanged": true,
-  "category_correct": true,
-  "distractor_coherent": true,
-  "chains_reasonable": true,
-  "has_contradiction": false,
-  "has_ambiguity": false,
-  "reason": "short explanation"
+  "pass": <true if all of the above pass, else false>,
+  "answer_unchanged": <true|false>,
+  "category_correct": <true|false>,
+  "distractor_coherent": <true|false>,
+  "chains_reasonable": <true|false>,
+  "has_contradiction": <true|false>,
+  "has_ambiguity": <true|false>,
+  "multi_question": <true|false>,
+  "preserves_target": <true|false>,
+  "broken": <true|false>,
+  "answer_correct": <true|false>,
+  "reason": "short explanation; if any of multi_question/preserves_target/broken/answer_correct is true (bad), explain why"
 }}"""
 
     return [{"role": "system", "content": system}, {"role": "user", "content": user}]
