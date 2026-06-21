@@ -82,19 +82,64 @@ bash train_scripts/remote/submit_grpo_v12_verl.sh
 
 ---
 
-## 3. 数据 symlink 自动处理
+## 3. 数据准备: One-Stop Pipeline (推荐) / symlink (legacy)
 
-`grpo_verl_v{12,12i,13,14}_vllm.yaml` 都期望 parquet 文件名是 `verl_grpo_train.parquet`, 但实际数据文件叫 `grpo_v{12_json,13_json,14_reasoning}.parquet`.
+### 3.1 现状 (2026-06-21)
 
-4 个提交器**各自自动**在 `${REMOTE_DATA_DIR}/` 下放一个 symlink (`verl_grpo_train.parquet -> grpo_v{XX}.parquet`), 合作者无需手动操作.
+合作者**不再需要手动 push 数据 parquet**. 仓库自带 3 个 build 脚本, 在 SLURM 任务里**自动**从 raw + supplementary jsonl 重新生成当前版本的 parquet, 然后立即用同一份 parquet 启动训练. 改 prompt 后重提一次任务即可, 不用动任何训练入口.
 
-**前提条件**: 对应数据文件必须**已经存在于** `${REMOTE_DATA_DIR}/` 下. 本资源包**已** push:
+资源配 (与 `data_preprocess_parsed_v6a_ALL.sh` 案例一致): 1 GPU / 8 CPU / 32GB / `gpu-all` partition, 日志写到 `./all_logs/%j-%x-slurm.{out,err}`.
 
-- ✅ `chaingsm_data/data/final/grpo/grpo_v12_json.parquet` (2.6 MB, V12 / V12i 共用)
-- ❌ `chaingsm_data/data/final/grpo/grpo_v13_json.parquet` (2.1 MB, **没 push**)
-- ❌ `chaingsm_data/data/final/grpo/grpo_v14_reasoning.parquet` (3.3 MB, **没 push**)
+### 3.2 3 个 build 脚本 (改 prompt 就改这里)
 
-**V13 / V14 训练数据需要从作者单独拿** (3 个 parquet 共 5.4 MB, 跟 V12i 数据同一目录, 容易补). 拿下来放进 `chaingsm_data/data/final/grpo/` 即可.
+| 版本 | build 脚本 (顶部 `SYSTEM` / `USER_TEMPLATE` / `V14_*` 常量就是 prompt) | 输出的 parquet |
+|---|---|---|
+| V12 / V12i | `chaingsm_data/data/final/sft/build_grpo_v12_json.py` | `chaingsm_data/data/final/grpo/grpo_v12_json.parquet` |
+| V13 | `chaingsm_data/data/final/sft/build_grpo_v13_json.py` | `chaingsm_data/data/final/grpo/grpo_v13_json.parquet` |
+| V14 | `chaingsm_data/data/final/sft/build_grpo_v14_reasoning.py` | `chaingsm_data/data/final/grpo/grpo_v14_reasoning.parquet` |
+
+### 3.3 3 个 pipeline 提交器 (preprocess + 训练 一条 sbatch)
+
+```bash
+# 默认 V12i (V12 prompt + V12i 4 项 LCS reward)
+sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
+
+# 想跑 V12 (V12 prompt + V12 7 项 reward)
+VERSION=v12 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
+
+# V13 / V14
+sbatch train_scripts/remote/submit_grpo_v13_pipeline.sh
+sbatch train_scripts/remote/submit_grpo_v14_pipeline.sh
+```
+
+每个 pipeline 内部:
+1. `bash data_preprocess_vXX.sh` 跑对应 build 脚本生成 `grpo_vXX_*.parquet` (1 GPU, 几秒到几分钟)
+2. 同一任务内立即 `python -m verl.trainer.main_ppo --config-name grpo_verl_vXX_vllm ...` 启动训练 (1 GPU, 接力)
+
+环境变量:
+
+| 变量 | 默认 | 用途 |
+|---|---|---|
+| `DRY_RUN=1` | 0 | 只打印要执行的命令, 不真跑 (本地自检用) |
+| `SKIP_PREPROCESS=1` | 0 | 跳过 build, 复用已存在的 parquet |
+| `VERSION=v12\|v12i` | `v12i` | 仅 V12 pipeline 有效 |
+| `V12_TOTAL_EPOCHS` / `V12I_TOTAL_EPOCHS` | 2 / 2 | 覆盖 V12 训练轮数 |
+| `V13_TOTAL_EPOCHS` | 2 | 覆盖 V13 训练轮数 |
+| `V14_TOTAL_EPOCHS` | 3 | 覆盖 V14 训练轮数 |
+| `REMOTE_ROOT` | `/home/wwq416/snap/wwq/math-chain` | 仓库根 |
+| `REMOTE_MODEL_PATH` | `/export/home/asifali/HF_cache/Qwen2.5-0.5B-Instruct` | 起点模型 |
+
+### 3.4 Legacy: 手动 push 数据 + symlink (不推荐, 保留兼容)
+
+如果合作者**已经**手动维护了一份 parquet (例如 V12 长期稳定版), 可以跳过预处理:
+
+```bash
+SKIP_PREPROCESS=1 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
+```
+
+老提交器 `submit_grpo_v{12,12i,13,14}_verl.sh` 也保留可用 (它们走 `submit_grpo_verl_vllm.sh`, 需要 parquet 已经在 `chaingsm_data/data/final/grpo/` 下; 主脚本自己放 `ln -sf grpo_vXX_*.parquet verl_grpo_train.parquet`).
+
+> 注: V12 和 V12i 共用 `grpo_v12_json.parquet`; V13 / V14 各自独立 parquet. 跑哪个版本就预处理哪个.
 
 ---
 

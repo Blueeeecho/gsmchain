@@ -212,6 +212,22 @@ SKIP_PREFLIGHT=1 bash train_scripts/remote/submit_grpo_v12i_verl.sh
 bash train_scripts/remote/submit_grpo_v12i_verl.sh
 ```
 
+### 5.1 One-Stop Pipeline (2026-06-21 新增, 推荐)
+
+V12i 推荐改用 `submit_grpo_v12_pipeline.sh` —— **preprocess + 训练 一条 sbatch**:
+
+```bash
+# 默认 V12i (V12 prompt + V12i 4 项 LCS reward)
+sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
+
+# V12 prompt 但 V12 7 项 reward
+VERSION=v12 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
+```
+
+合作者**不需要**手动 push `grpo_v12_json.parquet`. pipeline 内部先跑 `data_preprocess_v12.sh` (生成 V12 parquet), 再立即用同一份 parquet 启动 V12i 训练. 改 prompt 就改 `chaingsm_data/data/final/sft/build_grpo_v12_json.py` 顶部 `SYSTEM` / `USER_TEMPLATE` 然后重提.
+
+环境变量: `DRY_RUN=1` (自检), `SKIP_PREPROCESS=1` (复用已有 parquet), `REMOTE_ROOT`, `REMOTE_MODEL_PATH`, `V12I_TOTAL_EPOCHS=2`. 详见 `train_scripts/remote/data_preprocess_README.md`.
+
 ### 5.2 数据 symlink 自动处理
 
 `grpo_verl_v12i_vllm.yaml` 期望 parquet 文件名是 `verl_grpo_train.parquet`, V12i 数据叫 `grpo_v12_json.parquet`. `submit_grpo_v12i_verl.sh` **自动**在 `${REMOTE_DATA_DIR}/` 下放一个 symlink (`verl_grpo_train.parquet -> grpo_v12_json.parquet`), 合作者无需手动操作.
