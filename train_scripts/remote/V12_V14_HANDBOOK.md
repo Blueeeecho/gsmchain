@@ -89,7 +89,9 @@ SKIP_PREPROCESS=1 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 
 ### 3.1 现状 (2026-06-21)
 
-合作者**不再需要手动 push 数据 parquet**. 仓库自带 3 个 build 脚本, 在 SLURM 任务里**自动**从 raw + supplementary jsonl 重新生成当前版本的 parquet, 然后立即用同一份 parquet 启动训练. 改 prompt 后重提一次任务即可, 不用动任何训练入口.
+合作者**不再需要手动 push 数据 parquet**. 仓库自带 1 个 unified 训练 jsonl + 3 个 build 脚本, 在 SLURM 任务里**自动**从该 jsonl 重新生成当前版本的 parquet, 然后立即用同一份 parquet 启动训练. 改 prompt 后重提一次任务即可, 不用动任何训练入口.
+
+**训练数据规模** (×2 训练, 2026-06-21): unified jsonl 7070 行 (变体 4019 + 原题 3051, 每条 base_id 出现 2 次, 跟评测集 5467=3051+3051 对称) → V12/V13/V14 build 脚本内部 gold_trace 校验后保留 **6102 行** (变体 3051 + 原题 3051). 5 类别分布: original 3051 / attribute_mismatch 910 / independent_decoy 837 / path_competition 814 / target_scope_misalignment 490. 968 个 supp-only 因为 gold_trace 不是 dict 列表被 build 脚本过滤掉 (这是历史代码的过滤, 跟改 prompt 无关).  **原题行** category='original', distractor_chain=None, distractor_trace=None — 模型在原题上学习 '正常解题', 在变体上学习 '排除分心'.
 
 资源配 (与 `data_preprocess_parsed_v6a_ALL.sh` 案例一致): 1 GPU / 8 CPU / 32GB / `gpu-all` partition, 日志写到 `./all_logs/%j-%x-slurm.{out,err}`.
 

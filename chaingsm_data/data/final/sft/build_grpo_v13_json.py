@@ -26,8 +26,8 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path("/home/wwq416/snap/wwq/math-chain")
-SRC = ROOT / "chaingsm_data/data/final/train_balanced_one_variant/gsm8k_train_balanced_one_variant/gsm8k_train_balanced_one_variant_14946_clean.jsonl"
-SUP = ROOT / "chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/grpo_train_clean_v2.jsonl"
+# 2026-06-21: 改用 unified jsonl (raw 14946 + supp grpo_train_clean_v2 合并), 1 个文件就够.
+SRC = ROOT / "chaingsm_data/data/final/sft/gsm8k_train_unified_6102.jsonl"
 # Direct parquet output (no intermediate jsonl). Matches submit_grpo_v13_verl.sh
 # symlink target name expected by train_configs/remote/grpo_verl_v13_vllm.yaml.
 DST = ROOT / "chaingsm_data/data/final/grpo/grpo_v13_json.parquet"
@@ -135,61 +135,56 @@ Problem:
 
 
 def main():
-    if not SRC.exists() or not SUP.exists():
-        sys.exit(f"Missing input file: SRC={SRC.exists()} SUP={SUP.exists()}")
+    if not SRC.exists():
+        sys.exit(f"Missing input file: SRC={SRC}")
     DST.parent.mkdir(parents=True, exist_ok=True)
 
     src_by_id = {json.loads(l)["id"]: json.loads(l) for l in SRC.open()}
-    sup_by_id = {json.loads(l)["id"]: json.loads(l) for l in SUP.open()}
-    print(f"loaded src rows: {len(src_by_id)}, sup rows: {len(sup_by_id)}")
+    # 2026-06-21: 改用 unified jsonl, sup_by_id 不再需要
+    print(f"loaded src rows: {len(src_by_id)} (unified jsonl, raw+supp 合并)")
 
     written, skipped = 0, 0
     rows = []
     for sid, src in src_by_id.items():
-            sup = sup_by_id.get(sid)
-            if not sup:
-                skipped += 1
-                continue
-            ref = sup.get("reward_reference") or {}
-            gold_trace_raw = ref.get("gold_trace") or []
-            if not all(isinstance(t, dict) for t in gold_trace_raw):
-                skipped += 1
-                continue
-            if not gold_trace_raw:
-                skipped += 1
-                continue
+        gold_trace_raw = src.get("gold_trace") or []
+        if not all(isinstance(t, dict) for t in gold_trace_raw):
+            skipped += 1
+            continue
+        if not gold_trace_raw:
+            skipped += 1
+            continue
 
-            # Reuse all reward_meta fields from build_grpo.py
-            from build_grpo import build_gold_trace, build_gold_trace_tokens, build_distractor_values
-            answer = str(ref.get("gold_answer") or src.get("answer") or "")
-            gold_expr = ref.get("gold_expression") or src.get("gold_expression") or ""
-            gold_trace = build_gold_trace(gold_trace_raw)
-            tokens = build_gold_trace_tokens(gold_trace) or []
-            distractor_trace_raw = ref.get("distractor_trace") or []
-            distractor_trace = [t for t in distractor_trace_raw if isinstance(t, dict)]
-            distractor_expr = ref.get("distractor_expression") or src.get("distractor_expression") or ""
-            distractor_values = build_distractor_values(gold_trace, distractor_trace) if distractor_trace else []
+        # Reuse all reward_meta fields from build_grpo.py
+        from build_grpo import build_gold_trace, build_gold_trace_tokens, build_distractor_values
+        answer = str(src.get("answer") or "")
+        gold_expr = src.get("gold_expression") or ""
+        gold_trace = build_gold_trace(gold_trace_raw)
+        tokens = build_gold_trace_tokens(gold_trace) or []
+        distractor_trace_raw = src.get("distractor_trace") or []
+        distractor_trace = [t for t in distractor_trace_raw if isinstance(t, dict)]
+        distractor_expr = src.get("distractor_expression") or ""
+        distractor_values = build_distractor_values(gold_trace, distractor_trace) if distractor_trace else []
 
-            # Build the verl-compatible parquet row directly.
-            # v13-specific: include gold_steps and exclude_facts for the
-            # v13 reward's per-step hard numeric matching and r_exclude.
-            # (Equivalent to the old v13_json_to_parquet.py step, inlined here.)
-            messages = [
+        # Build the verl-compatible parquet row directly.
+        # v13-specific: include gold_steps and exclude_facts for the
+        # v13 reward's per-step hard numeric matching and r_exclude.
+        # (Equivalent to the old v13_json_to_parquet.py step, inlined here.)
+        messages = [
                 {"role": "system", "content": SYSTEM},
                 {"role": "user", "content": USER_TEMPLATE.replace("{question}", src["question_distracted"].strip())},
-            ]
-            gold_steps = [
+        ]
+        gold_steps = [
                 {
                     "explanation": step.get("quantity", ""),
                     "expression": step.get("expression", ""),
                     "value": step.get("value", ""),
                 }
                 for step in gold_trace
-            ]
-            exclude_facts = [
+        ]
+        exclude_facts = [
                 d.strip() for d in (distractor_values or []) if isinstance(d, str) and d.strip()
-            ]
-            ground_truth = {
+        ]
+        ground_truth = {
                 "answer": answer,
                 "gold_answer": answer,
                 "gold_expression": gold_expr,
@@ -200,8 +195,8 @@ def main():
                 "distractor_trace_tokens": [],
                 "distractor_enabled": bool(distractor_expr),
                 "category": src["category"],
-            }
-            rows.append({
+        }
+        rows.append({
                 "data_source": "chaingsm_cot_grpo_v13_json",
                 "prompt": [messages[0], messages[1]],
                 "ability": "math",
@@ -213,8 +208,8 @@ def main():
                     "split": "train",
                     "index": len(rows),
                 },
-            })
-            written += 1
+        })
+        written += 1
 
     DST.parent.mkdir(parents=True, exist_ok=True)
     df = pd.DataFrame(rows)

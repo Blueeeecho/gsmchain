@@ -6,6 +6,22 @@
 > `SOLUTION_PROMPT_1_SHOT_SYS` 同一种风格, **打开 build 脚本 → 滚到顶部 → 改三引号里的内容 → 保存 → 重提**,
 > **不需要查任何外部 md 文档**.
 
+## 训练数据集 (1 个 unified jsonl, 改 prompt 不再需要碰它)
+
+评测只需要 1 个 jsonl (`gsm8k_test_clean.jsonl`, 5467 题), 训练时 build 脚本也只读 1 个:
+`chaingsm_data/data/final/sft/gsm8k_train_unified_6102.jsonl` (7070 行, 变体 4019 + 原题 3051; build 脚本过滤后 = 变体 3051 + 原题 3051 = **6102 行**).
+
+合并脚本: `chaingsm_data/data/final/sft/build_unified_train_jsonl.py` (合并 raw + supp 字段, 从 supp.prompt 末尾补齐 968 行的 question_distracted 和 category).
+
+V12 / V13 / V14 build 脚本 (`build_grpo_v{12,13,14}_*.py`) 内部 gold_trace 校验后保留 **6102 行** (变体 3051 + 原题 3051, ×2 训练, 跟评测集 5467=3051+3051 对称). 5 类别分布:
+- original (原题): 3051
+- attribute_mismatch: 910
+- independent_decoy: 837
+- path_competition: 814
+- target_scope_misalignment: 490
+
+**改 prompt 时, 不需要也不应该重跑 build_unified_train_jsonl.py** —— 它只合并 raw + supp, 跟 prompt 无关. 只重跑 V12/V13/V14 build 脚本即可.
+
 ## 文件清单
 
 | 脚本 | 作用 | **prompt 在 build 脚本顶部的常量** (改这里) |

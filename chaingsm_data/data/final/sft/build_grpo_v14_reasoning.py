@@ -186,8 +186,8 @@ def _extract_question(user_content: str) -> str:
 ROOT = Path("/home/wwq416/snap/wwq/math-chain")
 # Self-contained: read raw + supplementary jsonl directly (same as v12/v13
 # build scripts), no intermediate V12 jsonl required.
-SRC = ROOT / "chaingsm_data/data/final/train_balanced_one_variant/gsm8k_train_balanced_one_variant/gsm8k_train_balanced_one_variant_14946_clean.jsonl"
-SUP = ROOT / "chaingsm_data/data/final/rl_preprocessed/gsm8k_train_balanced_one_variant_14946/grpo_train_clean_v2.jsonl"
+# 2026-06-21: 改用 unified jsonl (raw + supp 已合并), 1 个文件就够.
+SRC = ROOT / "chaingsm_data/data/final/sft/gsm8k_train_unified_6102.jsonl"
 OUT = ROOT / "chaingsm_data/data/final/grpo/grpo_v14_reasoning.parquet"
 
 # V12 tokenize 规则 (跟 build_grpo.py 一致)
@@ -304,27 +304,22 @@ def _last_value(reasoning: list):
 
 
 def main():
-    if not SRC.exists() or not SUP.exists():
-        sys.exit(f"Missing input file: SRC={SRC.exists()} SUP={SUP.exists()}")
+    if not SRC.exists():
+        sys.exit(f"Missing input file: SRC={SRC}")
 
-    # Build v12 reward_meta fields inline (same as build_grpo_v12_json.py).
+    # 2026-06-21: 改用 unified jsonl (raw + supp 已合并), 1 个文件就够.
     from build_grpo import build_gold_trace, build_gold_trace_tokens, build_distractor_values
 
     src_by_id = {json.loads(l)["id"]: json.loads(l) for l in SRC.open()}
-    sup_by_id = {json.loads(l)["id"]: json.loads(l) for l in SUP.open()}
-    print(f"loaded src rows: {len(src_by_id)}, sup rows: {len(sup_by_id)}")
+    print(f"loaded src rows: {len(src_by_id)} (unified jsonl, raw+supp 合并)")
 
     rows = []
     n = 0
     n_bad = 0
     n_with_dist = 0
     for sid, src in src_by_id.items():
-        sup = sup_by_id.get(sid)
-        if not sup:
-            n_bad += 1
-            continue
-        ref = sup.get("reward_reference") or {}
-        gold_trace_raw = ref.get("gold_trace") or []
+        # 2026-06-21: unified jsonl 字段已合并, 不再读 sup
+        gold_trace_raw = src.get("gold_trace") or []
         if not all(isinstance(t, dict) for t in gold_trace_raw):
             n_bad += 1
             continue
@@ -334,14 +329,14 @@ def main():
         n += 1
 
         gold_trace = build_gold_trace(gold_trace_raw)
-        gold_expression = ref.get("gold_expression") or src.get("gold_expression") or ""
+        gold_expression = src.get("gold_expression") or ""
         gold_trace_tokens = build_gold_trace_tokens(gold_trace) or []
-        distractor_trace_raw = ref.get("distractor_trace") or []
+        distractor_trace_raw = src.get("distractor_trace") or []
         distractor_trace = [t for t in distractor_trace_raw if isinstance(t, dict)]
-        distractor_expression = ref.get("distractor_expression") or src.get("distractor_expression") or ""
+        distractor_expression = src.get("distractor_expression") or ""
         distractor_values = build_distractor_values(gold_trace, distractor_trace) if distractor_trace else []
         category = src.get("category", "original")
-        gold_answer = str(ref.get("gold_answer") or src.get("answer") or "")
+        gold_answer = str(src.get("answer") or "")
         # V14 prompt user template uses __QUESTION__ placeholder
         question = src["question_distracted"].strip()
 
