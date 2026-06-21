@@ -91,3 +91,7 @@ chaingsm_data/reports/deepseek_gold_audit/
 
 # ===== GRPO 训练 parquet (本地保留, 远程不 push, build 时现生成) =====
 chaingsm_data/data/final/grpo/
+
+# ===== Legacy handbooks (本地保留, 远程不 push) =====
+train_scripts/remote/V12_V14_HANDBOOK.md
+train_scripts/remote/V12i_HANDBOOK.md
