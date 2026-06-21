@@ -54,3 +54,37 @@ chaingsm_data/reports/train_balanced_one_variant/
 .idea/
 all_logs/
 
+
+# ===== chaingsm_data/data/final/sft/ 中间产物 (2026-06-21, 本地保留, 远程不 push) =====
+# 老的 V8/V9/V10 时代 build 脚本, V12+ 已经不需要
+chaingsm_data/data/final/sft/build_grpo.py
+chaingsm_data/data/final/sft/build_sft.py
+chaingsm_data/data/final/sft/build_sft_train_jsonl.py
+chaingsm_data/data/final/sft/build_original_sft.py
+chaingsm_data/data/final/sft/build_original_grpo.py
+chaingsm_data/data/final/sft/enrich_all_grpo.py
+chaingsm_data/data/final/sft/merge_sft_grpo.py
+chaingsm_data/data/final/sft/v12_json_to_parquet.py
+chaingsm_data/data/final/sft/all_grpo_to_verl_parquet.py
+chaingsm_data/data/final/sft/all_grpo_cot_to_parquet.py
+
+# 老的中间 jsonl (all_sft / all_grpo / gsm8k_train_balanced_*)
+chaingsm_data/data/final/sft/all_*.jsonl
+chaingsm_data/data/final/sft/all_*.parquet
+chaingsm_data/data/final/sft/gsm8k_train_balanced_*.jsonl
+chaingsm_data/data/final/sft/gsm8k_train_unified_4019.jsonl
+chaingsm_data/data/final/sft/grpo_quality_warnings.jsonl
+chaingsm_data/data/final/sft/quality_warnings.jsonl
+chaingsm_data/data/final/sft/original_*_missing.jsonl
+chaingsm_data/data/final/sft/_dummy_val.parquet
+
+# 调试目录
+chaingsm_data/data/final/sft/nattrace_work/
+
+# ===== 老的辅助脚本 (本地保留, 远程不 push) =====
+chaingsm_data/data/final/sft/v13_json_to_parquet.py
+chaingsm_data/filter_grpo_by_deepseek.py
+chaingsm_data/regenerate_removed.py
+
+# ===== 审计报告目录 (本地保留, 远程不 push) =====
+chaingsm_data/reports/deepseek_gold_audit/
