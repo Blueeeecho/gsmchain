@@ -6,9 +6,8 @@ Output: chaingsm_data/data/final/sft/gsm8k_train_unified_6102.jsonl
 - 跟评测集 gsm8k_test_clean.jsonl (5467 = 3051 original + 3051 distracted) 对称
 - 每条变体配一条原题 (×2 训练): 变体用 question_distracted 字段存 distracted 题,
   原题用 question_distracted 字段存 original 题, category=original 区分
-- 总数 4019 (raw + supp-only) -> 变体 3051 + 原题 3051 = 6102 行
-  (968 个 supp-only 行 gold_trace 不是 dict 列表, build 脚本会过滤掉,
-  最终训练实际行数 = 变体 3051 + 原题 3051 = 6102)
+- supp 中 4019 行 (含 968 supp-only 无原题) -> 实际生成 变体 3051 + 原题 3051 = 6102 行
+  (968 supp-only 无 raw_row, 变体行直接跳过, 跟原题行 3051 完美配对)
 
 字段 (跟之前 4019 jsonl 一致, 保持命名不变):
 - id, base_id, source_index, category, variant_type
@@ -72,6 +71,10 @@ def make_row(sid: str, raw_row: dict | None, supp_row: dict, variant_type: str) 
     raw_question_distracted = (raw_row or {}).get("question_distracted")
     raw_question_original = (raw_row or {}).get("question_original")
 
+    # supp-only 变体 (无 raw_row): 不生成变体行, 训练时只保留 3051 变体 + 3051 原题 = 6102
+    if variant_type == "distracted" and raw_row is None:
+        return None
+
     if variant_type == "original":
         # 原题行: question_distracted 字段存原始题 (没分心), category=original, 无分心链
         if not raw_question_original:
@@ -134,7 +137,7 @@ def main() -> None:
     print(f"loaded supp: {len(supp_by_id)} rows", flush=True)
 
     DST.parent.mkdir(parents=True, exist_ok=True)
-    n_distracted = n_original = n_skipped = 0
+    n_distracted = n_original = n_supp_only_skip = 0
     with DST.open("w") as fout:
         # 遍历 supp 完整集 (4019), 每行同时生成 变体 + 原题 (如果 raw 有原题)
         for sid, supp_row in supp_by_id.items():
@@ -143,7 +146,7 @@ def main() -> None:
             # 变体行
             row_d = make_row(sid, raw_row, supp_row, "distracted")
             if row_d is None:
-                n_skipped += 1
+                n_supp_only_skip += 1
             else:
                 fout.write(json.dumps(row_d, ensure_ascii=False) + "\n")
                 n_distracted += 1
@@ -151,7 +154,7 @@ def main() -> None:
             # 原题行 (必须有 raw.question_original 才有, supp-only 没原题就跳过)
             row_o = make_row(sid, raw_row, supp_row, "original")
             if row_o is None:
-                n_skipped += 1
+                n_supp_only_skip += 1
             else:
                 fout.write(json.dumps(row_o, ensure_ascii=False) + "\n")
                 n_original += 1
@@ -159,7 +162,7 @@ def main() -> None:
     print(f"wrote {n_distracted + n_original} rows to {DST}", flush=True)
     print(f"  变体 (distracted): {n_distracted}", flush=True)
     print(f"  原题 (original):   {n_original}", flush=True)
-    print(f"  supp-only 跳过 (无原题): {n_skipped}", flush=True)
+    print(f"  supp-only 跳过 (无原题): {n_supp_only_skip}", flush=True)
 
 
 if __name__ == "__main__":

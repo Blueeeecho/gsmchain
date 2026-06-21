@@ -88,3 +88,6 @@ chaingsm_data/regenerate_removed.py
 
 # ===== 审计报告目录 (本地保留, 远程不 push) =====
 chaingsm_data/reports/deepseek_gold_audit/
+
+# ===== GRPO 训练 parquet (本地保留, 远程不 push, build 时现生成) =====
+chaingsm_data/data/final/grpo/
