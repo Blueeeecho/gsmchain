@@ -88,7 +88,7 @@ Use `DRY_RUN=1 SKIP_PREFLIGHT=1` to inspect commands locally:
 ```bash
 DRY_RUN=1 SKIP_PREFLIGHT=1 bash train_scripts/remote/submit_sft_verl.sh
 DRY_RUN=1 SKIP_PREFLIGHT=1 bash train_scripts/remote/submit_dpo_trl.sh
-DRY_RUN=1 SKIP_PREFLIGHT=1 bash train_scripts/remote/submit_grpo_verl_vllm.sh
+DRY_RUN=1 SKIP_PREPROCESS=1 bash train_scripts/remote/submit_grpo_v12_pipeline.sh
 DRY_RUN=1 SKIP_PREFLIGHT=1 bash train_scripts/remote/submit_sft_then_grpo_verl_vllm.sh
 ```
 
@@ -369,7 +369,7 @@ TOTAL_EPOCHS=1 \
 ROLLOUT_N=8 \
 TP_SIZE=2 \
 JOB_NAME=chaingsm-grpo-verl-vllm \
-bash train_scripts/remote/submit_grpo_verl_vllm.sh
+sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 ```
 
 This submits:

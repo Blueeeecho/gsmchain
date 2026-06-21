@@ -78,9 +78,16 @@ DRY_RUN=1 SKIP_PREPROCESS=1 bash train_scripts/remote/submit_grpo_v14_pipeline.s
 
 ## 不动的东西
 
-- `submit_grpo_v{12,12i,13,14}_verl.sh` (4 个 wrapper) 保留, 只想直接训练的合作者仍可调用.
-- `submit_grpo_verl_vllm.sh` (4 选 1 注释版) 保留, 但**不被 pipeline 调用** (它目前不接 `--version`, 是个老接口).
-- `preflight_remote.sh` / `remote_env.sh` 不动.
+- `submit_sft_verl.sh` / `submit_dpo_trl.sh` / `submit_sft_then_grpo_verl_vllm.sh`: 3 个 SFT/DPO 链提交器 (跟 V12 pipeline 独立, 走 `source remote_env.sh` + `preflight` 派).
+- `preflight_remote.sh` / `remote_env.sh`: 共享环境层与预检, 不动.
+- `V12_V14_HANDBOOK.md` / `V12i_HANDBOOK.md`: 4 版本总览, 仍在.
+
+## 已删除的 legacy 提交器 (2026-06-21)
+
+- `submit_grpo_verl_vllm.sh` (4 选 1 注释版, 实际不接 `--version`)
+- `submit_grpo_v{12,12i,13,14}_verl.sh` (4 个 wrapper, 全部 `exec` 到上面那个老接口, 实际不切档)
+
+合作者跑 V12-V14 **只走 pipeline** (`submit_grpo_v{12,13,14}_pipeline.sh`).
 
 ## 资源 / 队列 (与案例一致)
 

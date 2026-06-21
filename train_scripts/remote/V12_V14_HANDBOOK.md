@@ -12,10 +12,10 @@
 
 | 提交器 | JOB_NAME | 数据 | Reward | 训练量 | 评测 method |
 |---|---|---|---|---|---|
-| `submit_grpo_v12_verl.sh` | chaingsm-grpo-verl-v12 | grpo_v12_json.parquet | reward_chaingsm_v12_json_verl.py (4 项软 core) | 2 epoch | cot_brackets_v12_json |
-| `submit_grpo_v12i_verl.sh` | chaingsm-grpo-verl-v12i | grpo_v12_json.parquet | reward_chaingsm_v12i_json_verl.py (4 项 LCS) | 2 epoch | cot_brackets_v12_json |
-| `submit_grpo_v13_verl.sh` | chaingsm-grpo-verl-v13 | grpo_v13_json.parquet | reward_chaingsm_v13_json_verl.py (5 项硬匹配) | 2 epoch | cot_brackets_v13_json |
-| `submit_grpo_v14_verl.sh` | chaingsm-grpo-verl-v14 | grpo_v14_reasoning.parquet | reward_chaingsm_v14_reasoning_verl.py (4 项重做) | 3 epoch | cot_brackets_v14_reasoning |
+| `submit_grpo_v12_pipeline.sh` (V12) | chaingsm-grpo-v12-pipeline | grpo_v12_json.parquet | reward_chaingsm_v12_json_verl.py (4 项软 core) | 2 epoch | cot_brackets_v12_json |
+| `submit_grpo_v12_pipeline.sh` (V12i, **默认**) | chaingsm-grpo-v12i-pipeline | grpo_v12_json.parquet | reward_chaingsm_v12i_json_verl.py (4 项 LCS) | 2 epoch | cot_brackets_v12_json |
+| `submit_grpo_v13_pipeline.sh` | chaingsm-grpo-v13-pipeline | grpo_v13_json.parquet | reward_chaingsm_v13_json_verl.py (5 项硬匹配) | 2 epoch | cot_brackets_v13_json |
+| `submit_grpo_v14_pipeline.sh` | chaingsm-grpo-v14-pipeline | grpo_v14_reasoning.parquet | reward_chaingsm_v14_reasoning_verl.py (4 项重做) | 3 epoch | cot_brackets_v14_reasoning |
 
 **关键**: **V12 和 V12i 共用同一份训练数据** `grpo_v12_json.parquet` (V12 prompt 已内嵌, V12i 沿用 V12 prompt, 只换 reward); V13 / V14 各自独立数据.
 
@@ -29,22 +29,25 @@ rsync -avz --exclude='outputs/' --exclude='.git/' \
     ./math-chain/ user@remote:~/math-chain/
 cd ~/math-chain
 
-# 1) 干跑自检 (不真提交)
-DRY_RUN=1 SKIP_PREFLIGHT=1 bash train_scripts/remote/submit_grpo_v12_verl.sh
+# 1) 干跑自检 (不真提交, 打印 preprocess + train 两条命令)
+DRY_RUN=1 SKIP_PREPROCESS=1 bash train_scripts/remote/submit_grpo_v12_pipeline.sh
 
 #    期望看到 (关键检查):
-#      REMOTE_REWARD_PATH=.../reward_chaingsm_v12_json_verl.py   ← V12
-#      REMOTE_DATA_DIR=.../chaingsm_data/data/final/grpo          ← V12
-#      --config-name grpo_verl_v12_vllm                          ← V12 config
-#      trainer.total_epochs=2                                     ← V12 训练量
-#      JOB_NAME=chaingsm-grpo-verl-v12                           ← V12 任务名
-#      [v12] DRY_RUN=1, skip symlink/copy check
+#      preprocess: bash .../data_preprocess_v12.sh (生成 grpo_v12_json.parquet)
+#      train: ... --config-name grpo_verl_v12i_vllm ... (默认 V12i, 2 epochs)
 
-# 2) 跳过预检, 正式提交
-SKIP_PREFLIGHT=1 bash train_scripts/remote/submit_grpo_v12_verl.sh
+# 2) 正式提交 (一条 sbatch, 从 raw 到 ckpt)
+sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 
-# 3) 完整流程 (带预检)
-bash train_scripts/remote/submit_grpo_v12_verl.sh
+# 3) 想跑 V12 而不是 V12i
+VERSION=v12 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
+
+# 4) 其他版本
+sbatch train_scripts/remote/submit_grpo_v13_pipeline.sh
+sbatch train_scripts/remote/submit_grpo_v14_pipeline.sh
+
+# 5) 复用已有 parquet, 跳过 preprocess
+SKIP_PREPROCESS=1 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 ```
 
 **其他版本替换提交器名即可** (`v12` -> `v12i` / `v13` / `v14`).
@@ -131,17 +134,22 @@ sbatch train_scripts/remote/submit_grpo_v14_pipeline.sh
 | `REMOTE_ROOT` | `/home/wwq416/snap/wwq/math-chain` | 仓库根 |
 | `REMOTE_MODEL_PATH` | `/export/home/asifali/HF_cache/Qwen2.5-0.5B-Instruct` | 起点模型 |
 
-### 3.4 Legacy: 手动 push 数据 + symlink (不推荐, 保留兼容)
+### 3.4 复用已有 parquet
 
-如果合作者**已经**手动维护了一份 parquet (例如 V12 长期稳定版), 可以跳过预处理:
+合作者如果**已经**手动维护了一份 parquet (例如 V12 长期稳定版), 可以跳过预处理:
 
 ```bash
 SKIP_PREPROCESS=1 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 ```
 
-老提交器 `submit_grpo_v{12,12i,13,14}_verl.sh` 也保留可用 (它们走 `submit_grpo_verl_vllm.sh`, 需要 parquet 已经在 `chaingsm_data/data/final/grpo/` 下; 主脚本自己放 `ln -sf grpo_vXX_*.parquet verl_grpo_train.parquet`).
-
 > 注: V12 和 V12i 共用 `grpo_v12_json.parquet`; V13 / V14 各自独立 parquet. 跑哪个版本就预处理哪个.
+
+### 3.5 已删除的 legacy 提交器 (2026-06-21)
+
+- `submit_grpo_v{12,13,14}_pipeline.sh` (4 选 1 注释版, 实际不接 `--version`)
+- `submit_grpo_v{12,12i,13,14}_verl.sh` (4 个 wrapper, 全部 `exec` 到上面那个老接口, 实际不切档)
+
+合作者跑 V12-V14 **只走 pipeline** (`submit_grpo_v{12,13,14}_pipeline.sh`).
 
 ---
 
@@ -150,35 +158,12 @@ SKIP_PREPROCESS=1 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 ```bash
 # 改模型路径
 REMOTE_MODEL_PATH=/path/to/Qwen2.5-0.5B-Instruct \
-    bash submit_grpo_v12_verl.sh
+    sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 
-# 改 GPU 数 / rollout 采样数
-SLURM_GPUS=2 ROLLOUT_N=4 TP_SIZE=1 \
-    bash submit_grpo_v12_verl.sh
-
-# 改训练量
-GRPO_EPOCHS=3 \
-    bash submit_grpo_v12_verl.sh
-
-# 改 job 名
-JOB_NAME=my-v12-experiment \
-    bash submit_grpo_v12_verl.sh
+# 改训练量 (V12i 默认 2, V14 默认 3)
+V12I_TOTAL_EPOCHS=3 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
+V14_TOTAL_EPOCHS=2 sbatch train_scripts/remote/submit_grpo_v14_pipeline.sh
 ```
-
----
-
-## 5. 4 个提交器 vs 老 submit_grpo_verl_vllm.sh 对比
-
-| 项 | submit_grpo_verl_vllm.sh (老 V10) | submit_grpo_v12/12i/13/14_verl.sh (新) |
-|---|---|---|
-| config | grpo_verl_vllm.yaml | **grpo_verl_v{12,12i,13,14}_vllm.yaml** |
-| reward | reward_chaingsm.py (V10 风格, 5 项) | **reward_chaingsm_v{12,12i,13,14}_*.py (4-5 项)** |
-| data | rl_preprocessed/gsm8k_train_..._14946 | **grpo_v{12_json,13_json,14_reasoning}.parquet** |
-| epochs | 1 | **2 (V12/V12i/V13) / 3 (V14)** |
-| save_freq | 50 | **300** |
-| symlink | 手动 | **自动** |
-
-老脚本**保留**在包里 (`submit_grpo_verl_vllm.sh`), 跑 V10 老实验仍可用.
 
 ---
 
@@ -265,11 +250,11 @@ bash train_scripts/remote/preflight_remote.sh grpo
 train_scripts/remote/
 ├── remote_env.sh                    <-- 通用远程环境加载器 (所有 helper)
 ├── preflight_remote.sh              <-- 远程预检
-├── submit_grpo_verl_vllm.sh         <-- 老 V10 提交器 (保留)
-├── submit_grpo_v12_verl.sh          <-- ★ V12 提交器 (本次新增)
-├── submit_grpo_v12i_verl.sh         <-- V12i 提交器 (上次新增)
-├── submit_grpo_v13_verl.sh          <-- ★ V13 提交器 (本次新增)
-├── submit_grpo_v14_verl.sh          <-- ★ V14 提交器 (本次新增)
+├── submit_grpo_v{12,13,14}_pipeline.sh         <-- 老 V10 提交器 (保留)
+├── submit_grpo_v12_pipeline.sh          <-- ★ V12 提交器 (本次新增)
+├── submit_grpo_v12_pipeline.sh         <-- V12i 提交器 (上次新增)
+├── submit_grpo_v13_pipeline.sh          <-- ★ V13 提交器 (本次新增)
+├── submit_grpo_v14_pipeline.sh          <-- ★ V14 提交器 (本次新增)
 ├── V12i_HANDBOOK.md                 <-- V12i 单独说明 (上次新增)
 ├── V12_V14_HANDBOOK.md              <-- ★ V12-V14 总览 (本次新增)
 ├── submit_sft_verl.sh
