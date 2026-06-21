@@ -146,10 +146,20 @@ SKIP_PREPROCESS=1 sbatch train_scripts/remote/submit_grpo_v12_pipeline.sh
 
 ### 3.5 已删除的 legacy 提交器 (2026-06-21)
 
-- `submit_grpo_v{12,13,14}_pipeline.sh` (4 选 1 注释版, 实际不接 `--version`)
+- `submit_grpo_verl_vllm.sh` (4 选 1 注释版, 实际不接 `--version`)
 - `submit_grpo_v{12,12i,13,14}_verl.sh` (4 个 wrapper, 全部 `exec` 到上面那个老接口, 实际不切档)
 
 合作者跑 V12-V14 **只走 pipeline** (`submit_grpo_v{12,13,14}_pipeline.sh`).
+
+### 3.6 评测 prompt 自动同步 (2026-06-21)
+
+build 脚本每次跑会同步把 `SYSTEM` 写到 `${REMOTE_DATA_DIR}/_system_prompt.txt` (跟 parquet 同目录, 随 prompt 改动自动更新).
+
+`train_pipeline/eval_vllm_chaingsm.py` 加了 `method=parquet_prompt` 模式, 评测时直接读 `_system_prompt.txt` 当 system prompt —— **跟训练完全一致**, 避免 train-test prompt mismatch.
+
+`train_scripts/local/eval_v12_5ckpts.sh` 默认就是这个新模式. USER 段按 parquet 目录名 (v12/v13/v14) 自动选对应模板 + 答案抽取器. 不需要任何额外参数.
+
+旧 method (历史报告对比用) 仍可指定: `METHOD=cot_brackets_v12_json bash train_scripts/local/eval_v12_5ckpts.sh`.
 
 ---
 

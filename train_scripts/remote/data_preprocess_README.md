@@ -76,6 +76,24 @@ DRY_RUN=1 SKIP_PREPROCESS=1 bash train_scripts/remote/submit_grpo_v14_pipeline.s
 ```
 期望看到打印 preprocess + train 两条命令, 不真跑任何东西.
 
+## 评测 (跟训练用同一份 SYSTEM prompt)
+
+build 脚本每次跑会同步把 `SYSTEM` 写到 `${REMOTE_DATA_DIR}/_system_prompt.txt` (跟 parquet 同目录). 评测脚本 `eval_vllm_chaingsm.py` 加了 `method=parquet_prompt` 模式, 评测时直接读这个文件当 system prompt, 跟训练完全一致, **避免 train-test prompt mismatch**.
+
+评测入口已默认用 `parquet_prompt` (见 `train_scripts/local/eval_v12_5ckpts.sh`): 不需要任何额外参数. 想用旧 method (跟历史报告对比) 时设 `METHOD=cot_brackets_v12_json`.
+
+跑法:
+```bash
+# 默认用 parquet_prompt (评测 SYSTEM = 训练 SYSTEM)
+STEPS="300 600 900 1200 1500" \
+RUN_NAME=qwen2.5-0.5b-grpo-verl-v12i-reward \
+RUN_ID=<your_run_id> \
+bash train_scripts/local/eval_v12_5ckpts.sh
+
+# 想用旧 method (历史对比用)
+METHOD=cot_brackets_v12_json bash train_scripts/local/eval_v12_5ckpts.sh
+```
+
 ## 不动的东西
 
 - `submit_sft_verl.sh` / `submit_dpo_trl.sh` / `submit_sft_then_grpo_verl_vllm.sh`: 3 个 SFT/DPO 链提交器 (跟 V12 pipeline 独立, 走 `source remote_env.sh` + `preflight` 派).

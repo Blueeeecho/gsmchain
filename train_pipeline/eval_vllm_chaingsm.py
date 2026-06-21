@@ -544,6 +544,65 @@ def load_examples(data_path: str | Path, limit: int | None = None) -> list[EvalE
     return examples
 
 
+
+# --- 2026-06-21: parquet_prompt 模式的 prompt / 答案抽取路由 ---
+# _USER_TEMPLATE_VERSION 由 main() 在解析 --parquet-dir 时设置:
+#   /.../grpo_v12_json.parquet        -> "v12"  (default: 含 V12 USER_TEMPLATE)
+#   /.../grpo_v13_json.parquet        -> "v13"
+#   /.../grpo_v14_reasoning.parquet   -> "v14"
+#   其它                                -> "v12" (兜底)
+_USER_TEMPLATE_VERSION = "v12"
+_SYSTEM_PROMPT_CACHE: str | None = None
+
+
+def _detect_parquet_version(parquet_dir: str | Path) -> str:
+    """从 --parquet-dir 路径猜是 V12 / V13 / V14, 决定 USER_TEMPLATE + answer 抽取器."""
+    p = Path(parquet_dir)
+    name = p.name.lower()
+    if "v14" in name:
+        return "v14"
+    if "v13" in name:
+        return "v13"
+    if "v12" in name:
+        return "v12"
+    return "v12"
+
+
+def _load_training_system_prompt() -> str:
+    """读 build_grpo_vXX_*.py 写出的 _system_prompt.txt (与 grpo_vXX_*.parquet 同目录)."""
+    global _SYSTEM_PROMPT_CACHE
+    if _SYSTEM_PROMPT_CACHE is not None:
+        return _SYSTEM_PROMPT_CACHE
+    candidates = []
+    if _PARQUET_DIR_FOR_PROMPT is not None:
+        candidates.append(Path(_PARQUET_DIR_FOR_PROMPT) / "_system_prompt.txt")
+    # 兜底: 当前工作目录
+    candidates.append(Path.cwd() / "_system_prompt.txt")
+    for path in candidates:
+        if path.is_file():
+            _SYSTEM_PROMPT_CACHE = path.read_text(encoding="utf-8")
+            print(f"[eval] loaded training system prompt from {path} ({len(_SYSTEM_PROMPT_CACHE)} chars)", flush=True)
+            return _SYSTEM_PROMPT_CACHE
+    raise FileNotFoundError(
+        f"parquet_prompt mode 需要 _system_prompt.txt, 在以下位置都没找到: "
+        f"{[str(p) for p in candidates]}. "
+        f"请先跑 build_grpo_vXX_*.py 写出 SYSTEM 快照, 或显式 --parquet-dir 指向 parquet 所在目录."
+    )
+
+
+def _select_user_template_for_parquet_prompt() -> str:
+    """按 _USER_TEMPLATE_VERSION 选 USER_TEMPLATE. USER 段不带 few-shot examples."""
+    if _USER_TEMPLATE_VERSION == "v14":
+        return COT_BRACKETS_V14_REASONING_USER_TEMPLATE
+    if _USER_TEMPLATE_VERSION == "v13":
+        return COT_BRACKETS_V13_JSON_USER_TEMPLATE
+    return COT_BRACKETS_V12_JSON_USER_TEMPLATE
+
+
+# 全局变量, main() 通过 --parquet-dir 设置
+_PARQUET_DIR_FOR_PROMPT: str | None = None
+
+
 def build_messages(method: str, question: str) -> list[dict[str, str]]:
     if method == "train_json_prompt":
         # 2026-06-08: use the neutral prompt so eval-time prompt matches
@@ -585,6 +644,16 @@ def build_messages(method: str, question: str) -> list[dict[str, str]]:
         return [
             {"role": "system", "content": COT_BRACKETS_V14_REASONING_SYSTEM_PROMPT},
             {"role": "user", "content": COT_BRACKETS_V14_REASONING_USER_TEMPLATE.replace("{question}", question.strip())},
+        ]
+    if method == "parquet_prompt":
+        # 2026-06-21: 评测时复用训练时的 SYSTEM prompt (避免 train-test prompt mismatch).
+        # 来源: build_grpo_vXX_*.py 写出的 _system_prompt.txt, 路径从 --parquet-dir 拿.
+        # USER 段: 按 _USER_TEMPLATE_VERSION 选 V12/V13/V14 USER_TEMPLATE (与训练 schema 对齐).
+        system_prompt = _load_training_system_prompt()
+        user_template = _select_user_template_for_parquet_prompt()
+        return [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_template.replace("{question}", question.strip())},
         ]
     raise ValueError(f"Unsupported train-time eval method: {method}")
 
@@ -952,9 +1021,9 @@ def evaluate_with_vllm(
                     outputs = llm.generate(prompt_batch, sampling_params, use_tqdm=False)
                     for example, output in zip(example_batch, outputs):
                         raw_output = output.outputs[0].text if output.outputs else ""
-                        if method == "cot_brackets_v13_json":
+                        if method == "cot_brackets_v13_json" or _USER_TEMPLATE_VERSION == "v13":
                             pred_answer = extract_answer_with_json_v13(raw_output)
-                        elif method == "cot_brackets_v14_reasoning":
+                        elif method == "cot_brackets_v14_reasoning" or _USER_TEMPLATE_VERSION == "v14":
                             pred_answer = extract_answer_with_json_v14(raw_output)
                         else:
                             pred_answer = extract_answer_with_json_v12(raw_output)
@@ -1019,7 +1088,13 @@ def main() -> None:
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--data-path", default=DEFAULT_TEST_DATA)
     parser.add_argument("--output-dir", required=True)
-    parser.add_argument("--method", default="train_json_prompt", choices=["train_json_prompt", "direct", "zero_shot_cot", "cot_brackets", "cot_brackets_v12_json", "cot_brackets_v13_json", "cot_brackets_v14_reasoning"])
+    parser.add_argument("--method", default="train_json_prompt", choices=["train_json_prompt", "direct", "zero_shot_cot", "cot_brackets", "cot_brackets_v12_json", "cot_brackets_v13_json", "cot_brackets_v14_reasoning", "parquet_prompt"])
+    parser.add_argument(
+        "--parquet-dir",
+        default=None,
+        help="parquet_prompt 模式下指向 grpo_vXX_*.parquet 所在目录 (含 _system_prompt.txt). "
+             "不传时回退到 cwd. 自动从目录名 v12/v13/v14 选 USER_TEMPLATE + 答案抽取器.",
+    )
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--tensor-parallel-size", type=int, default=1)
@@ -1040,6 +1115,12 @@ def main() -> None:
     parser.add_argument("--trust-remote-code", action="store_true", default=True)
     parser.add_argument("--no-trust-remote-code", action="store_false", dest="trust_remote_code")
     args = parser.parse_args()
+    # 2026-06-21: parquet_prompt 模式设置全局
+    global _PARQUET_DIR_FOR_PROMPT, _USER_TEMPLATE_VERSION
+    _PARQUET_DIR_FOR_PROMPT = args.parquet_dir
+    _USER_TEMPLATE_VERSION = _detect_parquet_version(args.parquet_dir) if args.parquet_dir else "v12"
+    if args.method == "parquet_prompt":
+        print(f"[eval] parquet_prompt mode: _USER_TEMPLATE_VERSION={_USER_TEMPLATE_VERSION}", flush=True)
     result = evaluate_with_vllm(
         model_path=args.model_path,
         data_path=args.data_path,

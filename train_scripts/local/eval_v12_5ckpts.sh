@@ -13,7 +13,11 @@ CKPT_ROOT="${ROOT}/outputs/train/local/grpo_verl/Qwen2.5-0.5B-Instruct/${RUN_NAM
 # v12 实际落盘位置: $RUN_ID/global_step_* (无 checkpoints/ 中间层)
 # v12 实际落盘位置: $RUN_ID/global_step_* (无 checkpoints/ 中间层)
 EVAL_DATA="${ROOT}/chaingsm_data/data/gsmchain/gsm8k_test_clean.jsonl"
-METHOD="cot_brackets_v12_json"
+# 2026-06-21: parquet_prompt 模式需要 _system_prompt.txt 所在目录 (跟 grpo_vXX_*.parquet 同目录)
+PARQUET_DIR="${PARQUET_DIR:-${ROOT}/chaingsm_data/data/final/grpo}"
+# 2026-06-21: 默认用 parquet_prompt 模式 (评测 SYSTEM = 训练 SYSTEM, 来自 _system_prompt.txt)
+# 想用旧 method 把 METHOD 改成 cot_brackets_v12_json 即可.
+METHOD="${METHOD:-parquet_prompt}"
 GPU_MEM_UTIL=0.3
 BATCH_SIZE=64
 MAX_TOKENS=2048      # 2026-06-19: 1024 会截断 27% 样本, 升 2048 消截断
@@ -63,6 +67,7 @@ for STEP in $STEPS; do
       --data-path "$EVAL_DATA" \
       --output-dir "$OUT_DIR" \
       --method "$METHOD" \
+      --parquet-dir "$PARQUET_DIR" \
       --batch-size "$BATCH_SIZE" \
       --tensor-parallel-size 1 \
       --gpu-memory-utilization "$GPU_MEM_UTIL" \
