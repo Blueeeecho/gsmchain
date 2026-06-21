@@ -81,15 +81,39 @@ def test_dpo_trl_dry_run_uses_remote_env_and_resources() -> None:
     assert "--set training.num_train_epochs=1" in output
 
 
-def test_grpo_verl_dry_run_uses_remote_env_and_resources() -> None:
-    result = run_submit_script("submit_grpo_verl_vllm.sh")
-    assert result.returncode == 0, result.stderr
-    output = result.stdout
-    assert_common_sbatch_flags(output)
-    assert "verl.trainer.main_ppo" in output
-    assert "--config-name grpo_verl_vllm" in output
-    assert "actor_rollout_ref.rollout.n=8" in output
-    assert "actor_rollout_ref.rollout.tensor_model_parallel_size=2" in output
+def test_grpo_verl_vllm_lists_all_four_variants() -> None:
+    # New-style flat script: bash -n check + assert each variant is referenced.
+    # The 4 python invocations are mutually exclusive (3 are commented out at
+    # any time), so we only assert their config-name strings exist as
+    # commented or uncommented lines.
+    script = REMOTE_DIR / "submit_grpo_verl_vllm.sh"
+    assert script.is_file(), script
+    # Parse-check: bash -n returns 0 for valid syntax.
+    parse = subprocess.run(
+        ["bash", "-n", str(script)],
+        cwd=REPO_ROOT, env=os.environ.copy(), text=True,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+    )
+    assert parse.returncode == 0, parse.stderr
+    body = script.read_text()
+    # All four config-names must appear in the file (one per python line).
+    for cfg in ("grpo_verl_v12_vllm", "grpo_verl_v12i_vllm",
+                "grpo_verl_v13_vllm", "grpo_verl_v14_vllm"):
+        assert f"--config-name {cfg}" in body, f"missing {cfg} in script"
+    # v12i is the uncommented default; assert it is the active line.
+    active = [ln for ln in body.splitlines()
+              if ln.startswith("cd ") and "grpo_verl_v12i_vllm" in ln]
+    assert active, "expected v12i to be the uncommented default"
+    # The other three variants should be present but commented out.
+    for cfg in ("grpo_verl_v12_vllm", "grpo_verl_v13_vllm", "grpo_verl_v14_vllm"):
+        commented = [ln for ln in body.splitlines()
+                     if ln.startswith("#") and f"--config-name {cfg}" in ln]
+        assert commented, f"expected {cfg} to be commented out"
+    # Symlink block must include the v12/v12i shared parquet and the v13/v14
+    # specific parquets.
+    for src in ("grpo_v12_json.parquet", "grpo_v13_json.parquet",
+                "grpo_v14_reasoning.parquet"):
+        assert src in body, f"missing symlink source {src}"
 
 
 def test_sft_then_grpo_dry_run_chains_stage_commands() -> None:

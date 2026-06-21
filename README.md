@@ -153,7 +153,7 @@ math-chain/
       preflight_remote.sh
       submit_sft_verl.sh
       submit_dpo_trl.sh
-      submit_grpo_verl_vllm.sh
+      submit_grpo_verl_vllm.sh          <-- 4 行平铺，编辑文件切换 v12/v12i/v13/v14
       submit_sft_then_grpo_verl_vllm.sh
 
   tests/

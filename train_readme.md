@@ -304,14 +304,18 @@ bash train_scripts/remote/submit_sft_verl.sh
 
 ### 远程 GRPO，verl + vLLM
 
+`submit_grpo_verl_vllm.sh` 是一个 4 行平铺风格的脚本，**默认 v12i 是激活的那行**。要切换版本（v12 / v12i / v13 / v14），编辑脚本第 5 节，把对应那行取消注释、把其他三行注释掉；第 4 节的 symlink 也要做同样切换。
+
 ```bash
+# 在集群上：直接 sbatch 跑这个脚本即可（脚本顶部自带 #SBATCH 指令）
 bash train_scripts/remote/submit_grpo_verl_vllm.sh
 ```
 
-可覆盖 rollout 设置：
+如果 `REMOTE_ROOT` / `REMOTE_MODEL_PATH` 不在脚本第 3 节的默认值位置，可以临时覆盖：
 
 ```bash
-ROLLOUT_N=8 TP_SIZE=2 bash train_scripts/remote/submit_grpo_verl_vllm.sh
+REMOTE_ROOT=/path/to/math-chain REMOTE_MODEL_PATH=/path/to/Qwen2.5-0.5B-Instruct \
+    bash train_scripts/remote/submit_grpo_verl_vllm.sh
 ```
 
 ### 远程 DPO，TRL
