@@ -92,9 +92,30 @@ DRY_RUN=1 SKIP_PREPROCESS=1 bash train_scripts/remote/submit_grpo_v14_pipeline.s
 ```
 期望看到打印 preprocess + train 两条命令, 不真跑任何东西.
 
+## 远程仓库大小: 哪些是预生成, 哪些需要本地生成 (2026-06-21)
+
+**远程 main 不保存生成产物**, 合作者改 prompt / reward 后重跑 pipeline 就能恢复.
+
+| 文件 | 远程 main | 何时生成 | 怎么生成 |
+|---|---|---|---|
+| `gsm8k_train_unified_6102.jsonl` (7070 行, 28.7 MB) | ✅ 保留 | 改 raw/supp 时 | `python chaingsm_data/data/final/sft/build_unified_train_jsonl.py` |
+| `grpo_v{12,13,14}_*.parquet` (6102 行, 13.9 MB) | ❌ **不保存** | 改 prompt 时 | pipeline 脚本自动跑 `build_grpo_vXX_*.py` |
+| `_system_prompt.txt` (2.6 KB) | ❌ **不保存** | 改 prompt 时 | build 脚本自动同步 |
+| raw + supp 源文件 (~30 MB) | ✅ 保留 | 改原始数据集时 | 不能自动生成 (上游产物) |
+| 评测集 `gsm8k_test_clean.jsonl` (8.9 MB) | ✅ 保留 | 改评测集时 | 跑评测集构建脚本 |
+
+**合作者流程** (改 prompt 或 reward):
+1. 编辑 `build_grpo_vXX_*.py` 顶部 SYSTEM/USER_TEMPLATE 或 `train_pipeline/reward_chaingsm_vXX_*.py` reward 函数
+2. `sbatch train_scripts/remote/submit_grpo_vXX_pipeline.sh` —— **pipeline 内部会重新生成缺失的 parquet + _system_prompt.txt**, 不需要手动预处理
+3. 训练 + 评测都基于"刚生成的"产物
+
+**节省空间**: ~30 MB (3 个 GRPO parquet + _system_prompt.txt + V10 残留).
+
 ## 评测 (跟训练用同一份 SYSTEM prompt)
 
 build 脚本每次跑会同步把 `SYSTEM` 写到 `${REMOTE_DATA_DIR}/_system_prompt.txt` (跟 parquet 同目录). 评测脚本 `eval_vllm_chaingsm.py` 加了 `method=parquet_prompt` 模式, 评测时直接读这个文件当 system prompt, 跟训练完全一致, **避免 train-test prompt mismatch**.
+
+> **重要**: 远程 main 不保存 `_system_prompt.txt`. 评测前必须先跑一次 pipeline (即使 SKIP_PREPROCESS=1 也会触发 build 脚本的 `print` 但不会写文件, 所以**必须真的跑 build** 生成 _system_prompt.txt). 实际做法: `sbatch submit_grpo_vXX_pipeline.sh` 跑完训练后, 同一次任务内 build 已经写过 _system_prompt.txt, 直接评测即可.
 
 评测入口已默认用 `parquet_prompt` (见 `train_scripts/local/eval_v12_5ckpts.sh`): 不需要任何额外参数. 想用旧 method (跟历史报告对比) 时设 `METHOD=cot_brackets_v12_json`.
 
