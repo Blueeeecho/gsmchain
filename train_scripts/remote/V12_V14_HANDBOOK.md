@@ -92,11 +92,13 @@ bash train_scripts/remote/submit_grpo_v12_verl.sh
 
 ### 3.2 3 个 build 脚本 (改 prompt 就改这里)
 
+**Prompt 嵌在每个 build 脚本顶部的三引号常量里** (跟案例 `our_pre_process_zebrapuzzle_to_guru_parsed_v6a_LTLT.py` 的 `SOLUTION_PROMPT_1_SHOT_SYS` 同模式). 改完保存, 不需要查任何外部 md.
+
 | 版本 | build 脚本 (顶部 `SYSTEM` / `USER_TEMPLATE` / `V14_*` 常量就是 prompt) | 输出的 parquet |
 |---|---|---|
-| V12 / V12i | `chaingsm_data/data/final/sft/build_grpo_v12_json.py` | `chaingsm_data/data/final/grpo/grpo_v12_json.parquet` |
-| V13 | `chaingsm_data/data/final/sft/build_grpo_v13_json.py` | `chaingsm_data/data/final/grpo/grpo_v13_json.parquet` |
-| V14 | `chaingsm_data/data/final/sft/build_grpo_v14_reasoning.py` | `chaingsm_data/data/final/grpo/grpo_v14_reasoning.parquet` |
+| V12 / V12i | `chaingsm_data/data/final/sft/build_grpo_v12_json.py` (`SYSTEM` L24, `USER_TEMPLATE` L75) | `chaingsm_data/data/final/grpo/grpo_v12_json.parquet` |
+| V13 | `chaingsm_data/data/final/sft/build_grpo_v13_json.py` (`SYSTEM` L36, `USER_TEMPLATE` L72) | `chaingsm_data/data/final/grpo/grpo_v13_json.parquet` |
+| V14 | `chaingsm_data/data/final/sft/build_grpo_v14_reasoning.py` (`V14_SYSTEM_PROMPT` L32, `V14_USER_TEMPLATE` L77) | `chaingsm_data/data/final/grpo/grpo_v14_reasoning.parquet` |
 
 ### 3.3 3 个 pipeline 提交器 (preprocess + 训练 一条 sbatch)
 

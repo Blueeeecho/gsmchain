@@ -1,21 +1,43 @@
 # ChainGSM Remote — 数据预处理 + 训练 (One-Stop Pipeline)
 
 > **目的**: 让合作者**只改 prompt** 就能重跑训练, 不用手动准备 parquet / 不用 push 数据.
+>
+> **prompt 写在 build 脚本顶部** —— 跟案例 `our_pre_process_zebrapuzzle_to_guru_parsed_v6a_LTLT.py` 的
+> `SOLUTION_PROMPT_1_SHOT_SYS` 同一种风格, **打开 build 脚本 → 滚到顶部 → 改三引号里的内容 → 保存 → 重提**,
+> **不需要查任何外部 md 文档**.
 
 ## 文件清单
 
-| 脚本 | 作用 | 配套 build 脚本 (改 prompt 就改这里) |
-|---|---|---|
-| `data_preprocess_v12.sh` | raw + supplementary → `grpo_v12_json.parquet` | `chaingsm_data/data/final/sft/build_grpo_v12_json.py` (顶部 `SYSTEM` / `USER_TEMPLATE`) |
-| `data_preprocess_v13.sh` | raw + supplementary → `grpo_v13_json.parquet` | `chaingsm_data/data/final/sft/build_grpo_v13_json.py` (顶部 `SYSTEM` / `USER_TEMPLATE`) |
-| `data_preprocess_v14.sh` | raw + supplementary → `grpo_v14_reasoning.parquet` | `chaingsm_data/data/final/sft/build_grpo_v14_reasoning.py` (顶部 `V14_SYSTEM_PROMPT` / `V14_USER_TEMPLATE`) |
+| 脚本 | 作用 | **prompt 在 build 脚本顶部的常量** (改这里) |
+|---|---|---|---|
+| `data_preprocess_v12.sh` | raw + supplementary → `grpo_v12_json.parquet` | `chaingsm_data/data/final/sft/build_grpo_v12_json.py` → 顶部 `SYSTEM` (L24) + `USER_TEMPLATE` (L75) |
+| `data_preprocess_v13.sh` | raw + supplementary → `grpo_v13_json.parquet` | `chaingsm_data/data/final/sft/build_grpo_v13_json.py` → 顶部 `SYSTEM` (L36) + `USER_TEMPLATE` (L72) |
+| `data_preprocess_v14.sh` | raw + supplementary → `grpo_v14_reasoning.parquet` | `chaingsm_data/data/final/sft/build_grpo_v14_reasoning.py` → 顶部 `V14_SYSTEM_PROMPT` (L32) + `V14_USER_TEMPLATE` (L77) |
 | `submit_grpo_v12_pipeline.sh` | **V12 / V12i 一键** preprocess + 训练 (默认 V12i) | — |
 | `submit_grpo_v13_pipeline.sh` | **V13 一键** preprocess + 训练 | — |
 | `submit_grpo_v14_pipeline.sh` | **V14 一键** preprocess + 训练 | — |
 
+## 为什么 prompt 直接写在 build 脚本里 (跟案例同模式)
+
+案例 `data_preprocess_parsed_v6a_ALL.sh` 把 `python ./data_preprocess/logic/v6a/our_pre_process_zebrapuzzle_to_guru_parsed_v6a_LTLT.py`
+作为黑盒调用, prompt 全部嵌在该 py 顶部的 `SOLUTION_PROMPT_1_SHOT_SYS` 等常量里 — 改 prompt 不需要查任何外部 md.
+
+我们这里 3 个 build 脚本 (`build_grpo_v12_json.py` / `build_grpo_v13_json.py` / `build_grpo_v14_reasoning.py`)
+是**同一种模式**: `SYSTEM` / `USER_TEMPLATE` / `V14_SYSTEM_PROMPT` / `V14_USER_TEMPLATE`
+三引号常量写在文件**前 80 行**, 改完保存即可. 不存在 `prompt → 外部 .md → py` 的三跳链.
+
+`docs/prompts/v{12,13,14}_long_prompt.md` 是**历史快照** (跟 `eval_vllm_chaingsm.py` 评测侧同步用的),
+**不是**改 prompt 的入口. 改 prompt 永远只动 build 脚本顶部常量.
+
 ## 合作者最简流程 (3 步)
 
-1. **改 prompt**: 打开对应版本的 `build_grpo_vXX_*.py`, 编辑顶部 prompt 常量 (`SYSTEM` / `USER_TEMPLATE` / `V14_*`).
+1. **改 prompt** (跟案例同模式 — prompt 常量嵌在 build 脚本顶部):
+   ```bash
+   vim chaingsm_data/data/final/sft/build_grpo_v12_json.py    # V12/V12i: 改 SYSTEM (L24) + USER_TEMPLATE (L75)
+   vim chaingsm_data/data/final/sft/build_grpo_v13_json.py    # V13:     改 SYSTEM (L36) + USER_TEMPLATE (L72)
+   vim chaingsm_data/data/final/sft/build_grpo_v14_reasoning.py  # V14: 改 V14_SYSTEM_PROMPT (L32) + V14_USER_TEMPLATE (L77)
+   ```
+   只改三引号 `"""..."""` 里的内容, 文件其他逻辑 (SRC / SUP / DST 路径, row schema) 不要动.
 2. **重提任务** (单条 sbatch, 从 raw 到 ckpt 一气呵成):
    ```bash
    # 默认 V12i
